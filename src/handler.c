@@ -32,7 +32,7 @@ void new_client_handler(ftp_t *ftp)
     poller_fd_add(ftp->poller, cfd);
     cfdr = &ftp->poller->fds[ftp->poller->amount - 1].fd;
     clients_adder(ftp->clients, cfdr);
-    write(*cfdr, NEW_USER, strlen(NEW_USER));
+    WRITE_STATUS(*cfdr, 220);
 }
 
 void client_quit(ftp_t *ftp, unsigned int *i)
