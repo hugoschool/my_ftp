@@ -1,0 +1,13 @@
+name: cs2 Coding Style
+
+on:
+  push:
+
+jobs:
+  check-coding-style:
+    name: Check Coding Style
+    if: ${{ github.repository_owner == 'hugoschool' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hugoschool/cs2-action@v1
