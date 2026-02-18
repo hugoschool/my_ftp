@@ -8,7 +8,7 @@
 #include "my_ftp.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <sys/poll.h>
 #include <unistd.h>
 
 static ftp_t *ftp_init(void)
@@ -34,19 +34,15 @@ void ftp_free(ftp_t *ftp)
 
 void ftp_loop(ftp_t *ftp)
 {
-    struct sockaddr_in addr;
-    socklen_t addrl = sizeof(addr);
-    int cfd = -1;
-    const char *str = "Hello world!\n";
+    int result = 0;
 
     while (true) {
-        cfd = accept(ftp->control_fd, (struct sockaddr *) &addr, &addrl);
-        if (cfd < 0) {
-            perror("accept");
+        result = poll(ftp->poller->fds, ftp->poller->amount, -1);
+        if (result == -1) {
+            perror("poll");
             break;
         }
-        write(cfd, str, strlen(str));
-        close(cfd);
+        poll_handler(ftp);
     }
 }
 
@@ -59,6 +55,7 @@ bool my_ftp(args_t *args)
         ftp_free(ftp);
         return false;
     }
+    poller_set_init_socket(ftp->poller, ftp->control_fd);
     ftp_loop(ftp);
     ftp_free(ftp);
     return true;

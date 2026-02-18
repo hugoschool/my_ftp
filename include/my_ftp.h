@@ -24,6 +24,7 @@ typedef struct {
 } poller_t;
 
 poller_t *poller_init(void);
+void poller_set_init_socket(poller_t *poller, int socket_fd);
 void poller_free(poller_t *poller);
 
 typedef struct {
@@ -43,6 +44,9 @@ typedef struct {
 int socket_init(in_port_t port);
 
 void ftp_free(ftp_t *ftp);
+
+void poll_handler(ftp_t *ftp);
+
 // Returns false in case of an error
 bool my_ftp(args_t *args);
 
