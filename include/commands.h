@@ -11,7 +11,10 @@
     #include "my_ftp.h"
     #include <unistd.h>
 
+    #define USER_ANONYMOUS "Anonymous"
+
 void command_quit(ftp_t *ftp, unsigned int *i);
+void command_user(ftp_t *ftp, unsigned int *i);
 
 typedef struct {
     const char *command;
@@ -21,6 +24,7 @@ typedef struct {
 
 static const commands_t cmds[] = {
     {.command = "QUIT", .function = &command_quit, .end = false},
+    {.command = "USER", .function = &command_user, .end = false},
     {.command = "", .function = NULL, .end = true}
 };
 

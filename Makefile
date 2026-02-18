@@ -2,6 +2,10 @@ CC	?=	clang
 CFLAGS	:=	-Wall -Wextra -std=gnu17
 CPPFLAGS	:=	-I ./include
 
+ifeq ($(ENV), dev)
+	CFLAGS	+=	-g3
+endif
+
 SRC	:=	src/main.c \
 		src/args.c \
 		src/my_ftp.c \
@@ -13,7 +17,8 @@ SRC	:=	src/main.c \
 
 # Commands
 SRC	+=	src/commands/handler.c \
-		src/commands/quit.c
+		src/commands/quit.c \
+		src/commands/user.c
 
 # Utils
 SRC	+=	src/utils/strcmp_start.c \
