@@ -5,9 +5,9 @@
 ** handler.c
 */
 
+#include "commands.h"
 #include "my_ftp.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/poll.h>
 #include <arpa/inet.h>
@@ -50,22 +50,18 @@ void client_quit(ftp_t *ftp, unsigned int *i)
     }
 }
 
+// TODO: buffer should also be cleared here
+// TODO: make big circular buffer xd
 void client_handler(ftp_t *ftp, unsigned int *i)
 {
-    size_t temp_size = 256;
-    char buffer[temp_size];
     int fd = ftp->poller->fds[*i].fd;
-    int bytes_read = read(fd, buffer, temp_size);
-    const char *str = "Hello world!\n";
+    int bytes_read = read(fd, ftp->buffer, BUFFER_SIZE);
 
     if (bytes_read <= 0) {
         client_quit(ftp, i);
     } else {
-        buffer[bytes_read] = 0;
-        if (write(fd, str, strlen(str)) == -1) {
-            perror("write");
-            exit(84);
-        }
+        ftp->buffer[bytes_read] = 0;
+        commands_handler(ftp, i);
     }
 }
 
@@ -85,6 +81,8 @@ void poll_handler(ftp_t *ftp)
     for (unsigned int i = 0; i < amount; i++) {
         if (ftp->poller->fds[i].revents & POLLIN) {
             handle_pollin_events(ftp, &i);
+        } else if (ftp->poller->fds[i].revents == 0) {
+            client_quit(ftp, &i);
         }
     }
 }

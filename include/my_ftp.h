@@ -12,6 +12,9 @@
     #include <netinet/in.h>
     #include <stdbool.h>
 
+    #define BUFFER_SIZE 4096
+    #define CRLF "\r\n"
+
     #define CLIENTS_INIT_SIZE 50
     #define POLLER_INIT_SIZE 50
 
@@ -54,6 +57,7 @@ typedef struct {
     // CONTROL socket aka the main server socket
     int control_fd;
     clients_t *clients;
+    char buffer[BUFFER_SIZE];
 } ftp_t;
 
 // Clients data
@@ -68,11 +72,13 @@ void clients_delete(clients_t *clients, int i);
 // Sockets
 int socket_init(in_port_t port);
 
-void ftp_free(ftp_t *ftp);
-
+// Handler
+void client_quit(ftp_t *ftp, unsigned int *i);
 void poll_handler(ftp_t *ftp);
 
+// FTP
 // Returns false in case of an error
 bool my_ftp(args_t *args);
+void ftp_free(ftp_t *ftp);
 
 #endif

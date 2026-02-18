@@ -9,7 +9,16 @@ SRC	:=	src/main.c \
 		src/socket.c \
 		src/handler.c \
 		src/client.c \
-		src/client_data.c
+		src/client_data.c \
+
+# Commands
+SRC	+=	src/commands/handler.c \
+		src/commands/quit.c
+
+# Utils
+SRC	+=	src/utils/strcmp_start.c \
+		src/utils/strcmp_end.c
+
 OBJ	:=	$(SRC:.c=.o)
 
 BINARY	:=	myftp
