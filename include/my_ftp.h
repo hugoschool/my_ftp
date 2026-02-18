@@ -11,6 +11,7 @@
     #include "args.h"
     #include <netinet/in.h>
     #include <stdbool.h>
+    #include <sys/poll.h>
 
     #define BUFFER_SIZE 4096
     #define CRLF "\r\n"

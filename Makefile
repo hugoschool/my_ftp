@@ -18,7 +18,8 @@ SRC	:=	src/main.c \
 # Commands
 SRC	+=	src/commands/handler.c \
 		src/commands/quit.c \
-		src/commands/user.c
+		src/commands/user.c \
+		src/commands/pass.c
 
 # Utils
 SRC	+=	src/utils/strcmp_start.c \
