@@ -1,8 +1,9 @@
 CC	?=	clang
-CFLAGS	:=	-Wall -Wextra -std=c17
+CFLAGS	:=	-Wall -Wextra -std=gnu17
 CPPFLAGS	:=	-I ./include
 
-SRC	:=	src/main.c
+SRC	:=	src/main.c \
+		src/args.c
 OBJ	:=	$(SRC:.c=.o)
 
 BINARY	:=	myftp
