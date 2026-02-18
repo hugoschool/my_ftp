@@ -9,6 +9,7 @@
     #define MY_FTP_H_
 
     #include "args.h"
+    #include <netinet/in.h>
     #include <stdbool.h>
 
     #define POLLER_INIT_SIZE 50
@@ -37,6 +38,9 @@ typedef struct {
     int control_fd;
     data_t *data;
 } ftp_t;
+
+// Sockets
+int socket_init(in_port_t port);
 
 void ftp_free(ftp_t *ftp);
 void my_ftp(args_t *args);
