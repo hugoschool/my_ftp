@@ -8,8 +8,8 @@
 #include "commands.h"
 #include "my_ftp.h"
 #include "status.h"
+#include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
 #include <sys/poll.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -35,7 +35,7 @@ void new_client_handler(ftp_t *ftp)
     WRITE_STATUS(*cfdr, 220);
 }
 
-void client_quit(ftp_t *ftp, unsigned int *i)
+void client_quit(ftp_t *ftp, unsigned int *i, bool print)
 {
     int fd = ftp->poller->fds[*i].fd;
     struct sockaddr_in addr;
@@ -46,6 +46,8 @@ void client_quit(ftp_t *ftp, unsigned int *i)
         printf("%s:%d left\n",
             inet_ntoa(addr.sin_addr),
             ntohs(addr.sin_port));
+        if (print)
+            WRITE_STATUS(fd, 221);
         if (close(fd) == -1)
             perror("close");
         poller_fd_delete(ftp->poller, *i);
@@ -62,7 +64,7 @@ void client_handler(ftp_t *ftp, unsigned int *i)
     int bytes_read = read(fd, ftp->buffer, BUFFER_SIZE);
 
     if (bytes_read <= 0) {
-        client_quit(ftp, i);
+        client_quit(ftp, i, false);
     } else {
         ftp->buffer[bytes_read] = 0;
         commands_handler(ftp, i);

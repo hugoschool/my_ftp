@@ -6,8 +6,9 @@
 */
 
 #include "my_ftp.h"
+#include <stdbool.h>
 
 void command_quit(ftp_t *ftp, unsigned int *i)
 {
-    client_quit(ftp, i);
+    client_quit(ftp, i, true);
 }

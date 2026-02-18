@@ -74,7 +74,7 @@ void clients_delete(clients_t *clients, int i);
 int socket_init(in_port_t port);
 
 // Handler
-void client_quit(ftp_t *ftp, unsigned int *i);
+void client_quit(ftp_t *ftp, unsigned int *i, bool status);
 void poll_handler(ftp_t *ftp);
 
 // FTP
