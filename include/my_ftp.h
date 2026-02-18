@@ -44,6 +44,7 @@ typedef enum {
 typedef struct {
     // Pointer to its struct pollfd file descriptor
     int *fd;
+    char *path;
     login_step_t login_step;
 } client_data_t;
 
@@ -57,6 +58,7 @@ typedef struct {
     poller_t *poller;
     // CONTROL socket aka the main server socket
     int control_fd;
+    const char *initial_path;
     clients_t *clients;
     char buffer[BUFFER_SIZE];
 } ftp_t;

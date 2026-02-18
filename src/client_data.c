@@ -18,6 +18,7 @@ client_data_t *client_data_init(int *fd)
         exit(84);
     }
     data->fd = fd;
+    data->path = NULL;
     data->login_step = LOGGED_OUT;
     return data;
 }

@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 static void parse_help(void)
 {
@@ -18,9 +19,18 @@ static void parse_help(void)
         "  path is the path to the home directory for the Anonymous user\n");
 }
 
+static const char *parse_path(const char *path)
+{
+    if (access(path, R_OK) == -1) {
+        return NULL;
+    }
+    return path;
+}
+
 args_t parse_args(int argc, char **argv)
 {
     int port = -1;
+    const char *path = NULL;
 
     if (argc == 2 && (strcmp(argv[1], "--help") == 0
             || strcmp(argv[1], "-h") == 0)) {
@@ -31,11 +41,10 @@ args_t parse_args(int argc, char **argv)
     }
     if (argc == 3) {
         port = atoi(argv[1]);
+        path = parse_path(argv[2]);
         return (args_t){
-            .port = port,
-            .path = argv[2],
-            .help = false,
-            .valid = true,
+            .port = port, .path = path,
+            .help = false, .valid = path ? true : false,
         };
     }
     return (args_t){.valid = false};

@@ -21,6 +21,7 @@ static ftp_t *ftp_init(void)
     }
     ftp->poller = poller_init();
     ftp->control_fd = -1;
+    ftp->initial_path = NULL;
     ftp->clients = clients_init();
     return ftp;
 }
@@ -56,6 +57,7 @@ bool my_ftp(args_t *args)
         ftp_free(ftp);
         return false;
     }
+    ftp->initial_path = args->path;
     poller_set_init_socket(ftp->poller, ftp->control_fd);
     ftp_loop(ftp);
     ftp_free(ftp);

@@ -11,8 +11,8 @@
     #include <stdbool.h>
 
 typedef struct {
-    int port;
-    char *path;
+    const int port;
+    const char *path;
     bool help;
     // Must be true when the args are valid (ex: --help)
     bool valid;
