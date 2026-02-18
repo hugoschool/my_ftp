@@ -50,12 +50,16 @@ void ftp_loop(ftp_t *ftp)
     }
 }
 
-void my_ftp(args_t *args)
+bool my_ftp(args_t *args)
 {
     ftp_t *ftp = ftp_init();
 
     ftp->control_fd = socket_init(args->port);
+    if (ftp->control_fd == -1) {
+        ftp_free(ftp);
+        return false;
+    }
     ftp_loop(ftp);
     ftp_free(ftp);
-    return;
+    return true;
 }

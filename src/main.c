@@ -19,6 +19,7 @@ int main(int argc, char **argv)
     }
     if (args.help)
         return 0;
-    my_ftp(&args);
+    if (!my_ftp(&args))
+        return 84;
     return 0;
 }

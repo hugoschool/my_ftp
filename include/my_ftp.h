@@ -43,6 +43,7 @@ typedef struct {
 int socket_init(in_port_t port);
 
 void ftp_free(ftp_t *ftp);
-void my_ftp(args_t *args);
+// Returns false in case of an error
+bool my_ftp(args_t *args);
 
 #endif
