@@ -13,9 +13,9 @@ void commands_handler(ftp_t *ftp, unsigned int *i)
 {
     if (strcmp_end(ftp->buffer, CRLF) != 0)
         return;
-    for (int x = 0; cmds[x].end == false; i++) {
-        if (strcmp_start(ftp->buffer, cmds[x].command) == 0) {
-            cmds[x].function(ftp, i);
+    for (int cmd_i = 0; cmds[cmd_i].end == false; cmd_i++) {
+        if (strcmp_start(ftp->buffer, cmds[cmd_i].command) == 0) {
+            cmds[cmd_i].function(ftp, i);
             break;
         }
     }
