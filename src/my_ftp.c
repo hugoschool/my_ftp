@@ -21,6 +21,7 @@ static ftp_t *ftp_init(void)
     }
     ftp->poller = poller_init();
     ftp->control_fd = -1;
+    ftp->clients = clients_init();
     return ftp;
 }
 

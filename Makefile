@@ -7,7 +7,9 @@ SRC	:=	src/main.c \
 		src/my_ftp.c \
 		src/poller.c \
 		src/socket.c \
-		src/handler.c
+		src/handler.c \
+		src/client.c \
+		src/client_data.c
 OBJ	:=	$(SRC:.c=.o)
 
 BINARY	:=	myftp
