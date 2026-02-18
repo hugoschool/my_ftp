@@ -3,7 +3,9 @@ CFLAGS	:=	-Wall -Wextra -std=gnu17
 CPPFLAGS	:=	-I ./include
 
 SRC	:=	src/main.c \
-		src/args.c
+		src/args.c \
+		src/my_ftp.c \
+		src/poller.c
 OBJ	:=	$(SRC:.c=.o)
 
 BINARY	:=	myftp
