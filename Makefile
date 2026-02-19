@@ -22,7 +22,8 @@ SRC	+=	src/commands/handler.c \
 		src/commands/pass.c \
 		src/commands/noop.c \
 		src/commands/pwd.c \
-		src/commands/cwd.c
+		src/commands/cwd.c \
+		src/commands/cdup.c
 
 # Utils
 SRC	+=	src/utils/strcmp_start.c \

@@ -27,14 +27,6 @@ static void full_appended_path(char new[], const char *initial,
     }
 }
 
-static void change_path(client_data_t *data, const char *full_path,
-    const char *initial_path)
-{
-    if (data->path)
-        free(data->path);
-    data->path = strdup(full_path + strlen(initial_path));
-}
-
 static bool verify_path(ftp_t *ftp, char full_path[], const char *client_path,
     const char *path)
 {
@@ -76,6 +68,6 @@ void command_cwd(ftp_t *ftp, unsigned int *i)
         WRITE_STATUS(*CLIENT->fd, 550);
         return;
     }
-    change_path(CLIENT, full_path, ftp->initial_path);
+    client_data_change_path(CLIENT, full_path, ftp->initial_path);
     WRITE_STATUS(*CLIENT->fd, 250);
 }

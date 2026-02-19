@@ -68,6 +68,8 @@ typedef struct {
 // Clients data
 client_data_t *client_data_init(int *fd);
 void client_data_free(client_data_t *data);
+void client_data_change_path(client_data_t *data, const char *full_path,
+    const char *initial_path);
 
 // Clients
 clients_t *clients_init(void);

@@ -35,3 +35,14 @@ void client_data_free(client_data_t *data)
     free(data);
     data = NULL;
 }
+
+void client_data_change_path(client_data_t *data, const char *full_path,
+    const char *initial_path)
+{
+    if (data->path)
+        free(data->path);
+    if (full_path == NULL)
+        data->path = strdup("/");
+    else
+        data->path = strdup(full_path + strlen(initial_path));
+}
