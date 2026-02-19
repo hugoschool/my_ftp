@@ -20,6 +20,10 @@ client_data_t *client_data_init(int *fd)
     }
     data->fd = fd;
     data->path = strdup("/");
+    if (data->path == NULL) {
+        perror("strdup");
+        exit(84);
+    }
     data->login_step = LOGGED_OUT;
     return data;
 }
@@ -45,4 +49,8 @@ void client_data_change_path(client_data_t *data, const char *full_path,
         data->path = strdup("/");
     else
         data->path = strdup(full_path + strlen(initial_path));
+    if (data->path == NULL) {
+        perror("strdup");
+        exit(84);
+    }
 }
