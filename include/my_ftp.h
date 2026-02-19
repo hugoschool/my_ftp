@@ -16,6 +16,8 @@
     #define BUFFER_SIZE 4096
     #define CRLF "\r\n"
 
+    #define CLIENT ftp->clients->clients[*i]
+
     #define CLIENTS_INIT_SIZE 50
     #define POLLER_INIT_SIZE 50
 

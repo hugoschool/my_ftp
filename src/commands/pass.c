@@ -11,16 +11,14 @@
 
 void command_pass(ftp_t *ftp, unsigned int *i)
 {
-    login_step_t step = ftp->clients->clients[*i]->login_step;
-
-    if (step == LOGGED_IN) {
+    if (CLIENT->login_step == LOGGED_IN) {
         WRITE_STATUS(ftp->poller->fds[*i].fd, 230);
         return;
     }
-    if (step == LOGGED_OUT) {
+    if (CLIENT->login_step == LOGGED_OUT) {
         WRITE_STATUS(ftp->poller->fds[*i].fd, 331);
         return;
     }
-    ftp->clients->clients[*i]->login_step = LOGGED_IN;
+    CLIENT->login_step = LOGGED_IN;
     WRITE_STATUS(ftp->poller->fds[*i].fd, 230);
 }
