@@ -30,7 +30,8 @@ void client_data_free(client_data_t *data)
 {
     if (data == NULL)
         return;
-    free(data->path);
+    if (data->path)
+        free(data->path);
     free(data);
     data = NULL;
 }
