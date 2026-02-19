@@ -9,6 +9,7 @@
     #define STATUS_H_
 
     #include <string.h>
+    #include <unistd.h>
 
     #ifndef CRLF
         #define CRLF "\r\n"
@@ -17,6 +18,7 @@
     #define WRITE_STATUS(fd, c) write(fd, status._##c, strlen(status._##c))
 
 typedef struct {
+    char *_200;
     char *_220;
     char *_221;
     char *_230;
@@ -24,6 +26,7 @@ typedef struct {
 } status_codes_t;
 
 static const status_codes_t status = {
+    ._200 = "200 Command okay."CRLF,
     ._220 = "220 Service ready for new user."CRLF,
     ._221 = "221 Service closing control connection."CRLF,
     ._230 = "230 User logged in, proceed."CRLF,
