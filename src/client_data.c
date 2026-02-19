@@ -8,6 +8,7 @@
 #include "my_ftp.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 client_data_t *client_data_init(int *fd)
 {
@@ -18,15 +19,18 @@ client_data_t *client_data_init(int *fd)
         exit(84);
     }
     data->fd = fd;
-    data->path = NULL;
+    data->path = strdup("/");
     data->login_step = LOGGED_OUT;
     return data;
 }
 
+// data->fd should not be freed here, it's the poller's responsibility
+// to free it.
 void client_data_free(client_data_t *data)
 {
     if (data == NULL)
         return;
+    free(data->path);
     free(data);
     data = NULL;
 }

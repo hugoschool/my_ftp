@@ -31,6 +31,7 @@ void ftp_free(ftp_t *ftp)
     poller_free(ftp->poller);
     if (ftp->control_fd != -1)
         close(ftp->control_fd);
+    free((void *)ftp->initial_path);
     free(ftp);
 }
 
@@ -57,7 +58,7 @@ bool my_ftp(args_t *args)
         ftp_free(ftp);
         return false;
     }
-    ftp->initial_path = args->path;
+    ftp->initial_path = realpath(args->path, NULL);
     poller_set_init_socket(ftp->poller, ftp->control_fd);
     ftp_loop(ftp);
     ftp_free(ftp);

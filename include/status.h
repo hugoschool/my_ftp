@@ -23,6 +23,7 @@ typedef struct {
     char *_221;
     char *_230;
     char *_331;
+    char *_530_out;
 } status_codes_t;
 
 static const status_codes_t status = {
@@ -31,6 +32,7 @@ static const status_codes_t status = {
     ._221 = "221 Service closing control connection."CRLF,
     ._230 = "230 User logged in, proceed."CRLF,
     ._331 = "331 User name okay, need password."CRLF,
+    ._530_out = "530 Please login with USER and PASS."CRLF,
 };
 
 #endif
