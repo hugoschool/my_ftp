@@ -7,6 +7,7 @@
 
 #include "commands.h"
 #include "my_ftp.h"
+#include "status.h"
 #include "utils.h"
 
 void commands_handler(ftp_t *ftp, unsigned int *i)
@@ -16,7 +17,8 @@ void commands_handler(ftp_t *ftp, unsigned int *i)
     for (int cmd_i = 0; cmds[cmd_i].end == false; cmd_i++) {
         if (strcmp_start(ftp->buffer, cmds[cmd_i].command) == 0) {
             cmds[cmd_i].function(ftp, i);
-            break;
+            return;
         }
     }
+    WRITE_STATUS(*CLIENT->fd, 500);
 }
