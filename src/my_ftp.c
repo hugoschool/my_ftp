@@ -39,6 +39,7 @@ void ftp_loop(ftp_t *ftp)
 {
     int result = 0;
 
+    printf("Server started, waiting for connections.\n");
     while (true) {
         result = poll(ftp->poller->fds, ftp->poller->amount, -1);
         if (result == -1) {
