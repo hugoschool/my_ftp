@@ -23,7 +23,8 @@ SRC	+=	src/commands/handler.c \
 		src/commands/noop.c \
 		src/commands/pwd.c \
 		src/commands/cwd.c \
-		src/commands/cdup.c
+		src/commands/cdup.c \
+		src/commands/pasv.c
 
 # Utils
 SRC	+=	src/utils/strcmp_start.c \

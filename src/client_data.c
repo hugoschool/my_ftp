@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 client_data_t *client_data_init(int *fd)
 {
@@ -24,6 +25,7 @@ client_data_t *client_data_init(int *fd)
         perror("strdup");
         exit(84);
     }
+    data->data_fd = -1;
     data->login_step = LOGGED_OUT;
     return data;
 }
@@ -36,6 +38,8 @@ void client_data_free(client_data_t *data)
         return;
     if (data->path)
         free(data->path);
+    if (data->data_fd != -1)
+        close(data->data_fd);
     free(data);
     data = NULL;
 }

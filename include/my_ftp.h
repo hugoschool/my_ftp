@@ -48,6 +48,7 @@ typedef struct {
     // Pointer to its struct pollfd file descriptor
     int *fd;
     char *path;
+    int data_fd;
     login_step_t login_step;
 } client_data_t;
 
