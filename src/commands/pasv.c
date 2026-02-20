@@ -38,15 +38,9 @@ static void print_status(int fd, struct in_addr *in, in_port_t port)
     char *ip = get_formatted_ip(inet_ntoa(*in));
     int p1 = -1;
     int p2 = -1;
-    int size = -1;
-    char *str = NULL;
 
     get_formatted_port(&port, &p1, &p2);
-    size = snprintf(NULL, 0, GET_STATUS(227), ip, p1, p2) + 1;
-    str = malloc(sizeof(char) * (size + 1));
-    snprintf(str, size, GET_STATUS(227), ip, p1, p2);
-    write(fd, str, size);
-    free(str);
+    dprintf(fd, GET_STATUS(227), ip, p1, p2);
 }
 
 void command_pasv(ftp_t *ftp, unsigned int *i)
