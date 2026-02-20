@@ -1,0 +1,17 @@
+name: Build
+
+on:
+  push:
+
+jobs:
+  build:
+    name: Build
+    if: ${{ github.repository_owner == 'hugoschool' }}
+    runs-on: ubuntu-latest
+    container:
+        image: epitechcontent/epitest-docker:latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Compiling program
+        timeout-minutes: 2
+        run: make -j`nproc`
