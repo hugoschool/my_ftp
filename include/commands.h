@@ -15,6 +15,7 @@
 
 void command_cdup(ftp_t *ftp, unsigned int *i);
 void command_cwd(ftp_t *ftp, unsigned int *i);
+void command_list(ftp_t *ftp, unsigned int *i);
 void command_noop(ftp_t *ftp, unsigned int *i);
 void command_pass(ftp_t *ftp, unsigned int *i);
 void command_pasv(ftp_t *ftp, unsigned int *i);
@@ -31,6 +32,7 @@ typedef struct {
 static const commands_t cmds[] = {
     {.command = "CDUP", .function = &command_cdup, .end = false},
     {.command = "CWD", .function = &command_cwd, .end = false},
+    {.command = "LIST", .function = &command_list, .end = false},
     {.command = "NOOP", .function = &command_noop, .end = false},
     {.command = "PASS", .function = &command_pass, .end = false},
     {.command = "PASV", .function = &command_pasv, .end = false},
