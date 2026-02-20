@@ -12,12 +12,9 @@
 #include <sys/poll.h>
 #include <unistd.h>
 
-// step == USERNAME_TYPE (?)
-// 530 Wrong user
 void command_user(ftp_t *ftp, unsigned int *i)
 {
     login_step_t step = CLIENT->login_step;
-    const char *unknown = "000 Unknown username"CRLF;
     const char *username = NULL;
 
     if (step == LOGGED_IN) {
@@ -27,11 +24,10 @@ void command_user(ftp_t *ftp, unsigned int *i)
     username = strchr(ftp->buffer, ' ');
     if (username && strncmp(username + 1,
             USER_ANONYMOUS, strlen(USER_ANONYMOUS)) == 0) {
-        CLIENT->login_step = USERNAME_TYPED;
-        WRITE_STATUS(ftp->poller->fds[*i].fd, 331);
-        return;
+        CLIENT->login_step = CORRECT_USERNAME;
     } else {
-        write(ftp->poller->fds[*i].fd, unknown, strlen(unknown));
-        return;
+        CLIENT->login_step = INCORRECT_USERNAME;
     }
+    WRITE_STATUS(ftp->poller->fds[*i].fd, 331);
+    return;
 }

@@ -15,6 +15,11 @@ void command_pass(ftp_t *ftp, unsigned int *i)
         WRITE_STATUS(ftp->poller->fds[*i].fd, 230);
         return;
     }
+    if (CLIENT->login_step == INCORRECT_USERNAME) {
+        WRITE_STATUS(ftp->poller->fds[*i].fd, 530_incorrect);
+        CLIENT->login_step = LOGGED_OUT;
+        return;
+    }
     if (CLIENT->login_step == LOGGED_OUT) {
         WRITE_STATUS(ftp->poller->fds[*i].fd, 331);
         return;

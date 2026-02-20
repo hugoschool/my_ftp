@@ -38,7 +38,8 @@ void poller_free(poller_t *poller);
 
 typedef enum {
     LOGGED_OUT,
-    USERNAME_TYPED,
+    CORRECT_USERNAME,
+    INCORRECT_USERNAME,
     WRONG_PASSWORD,
     LOGGED_IN
 } login_step_t;

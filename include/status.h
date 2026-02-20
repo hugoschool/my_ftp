@@ -27,6 +27,7 @@ typedef struct {
     char *_500;
     char *_501;
     char *_530_out;
+    char *_530_incorrect;
     char *_550;
 } status_codes_t;
 
@@ -40,6 +41,7 @@ static const status_codes_t status = {
     ._500 = "500 Unknown command."CRLF,
     ._501 = "501 Incorrect arguments."CRLF,
     ._530_out = "530 Please login with USER and PASS."CRLF,
+    ._530_incorrect = "530 Login incorrect."CRLF,
     ._550 = "550 Requested action not taken."CRLF,
 };
 
