@@ -38,8 +38,7 @@ void client_data_free(client_data_t *data)
         return;
     if (data->path)
         free(data->path);
-    if (data->data_fd != -1)
-        close(data->data_fd);
+    client_data_close_data_socket(data);
     free(data);
     data = NULL;
 }
@@ -57,4 +56,11 @@ void client_data_change_path(client_data_t *data, const char *full_path,
         perror("strdup");
         exit(84);
     }
+}
+
+void client_data_close_data_socket(client_data_t *data)
+{
+    if (data->data_fd != -1)
+        close(data->data_fd);
+    data->data_fd = -1;
 }

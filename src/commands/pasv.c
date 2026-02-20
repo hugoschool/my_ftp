@@ -52,6 +52,8 @@ void command_pasv(ftp_t *ftp, unsigned int *i)
         WRITE_STATUS(*CLIENT->fd, 530_out);
         return;
     }
+    if (CLIENT->data_fd != -1)
+        client_data_close_data_socket(CLIENT);
     CLIENT->data_fd = socket_init(0);
     if (CLIENT->data_fd == -1) {
         WRITE_STATUS(*CLIENT->fd, 425);
