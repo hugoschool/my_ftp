@@ -19,22 +19,22 @@
     #define WRITE_STATUS(fd, c) write(fd, status._##c, strlen(status._##c))
 
 typedef struct {
-    char *_150;
-    char *_200;
-    char *_220;
-    char *_221;
-    char *_226;
-    char *_227;
-    char *_230;
-    char *_250;
-    char *_331;
-    char *_425;
-    char *_426;
-    char *_500;
-    char *_501;
-    char *_530_out;
-    char *_530_incorrect;
-    char *_550;
+    const char *_150;
+    const char *_200;
+    const char *_220;
+    const char *_221;
+    const char *_226;
+    const char *_227;
+    const char *_230;
+    const char *_250;
+    const char *_331;
+    const char *_425;
+    const char *_426;
+    const char *_500;
+    const char *_501;
+    const char *_530_out;
+    const char *_530_incorrect;
+    const char *_550;
 } status_codes_t;
 
 static const status_codes_t status = {
