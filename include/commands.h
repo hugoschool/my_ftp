@@ -21,6 +21,7 @@ void command_pass(ftp_t *ftp, unsigned int *i);
 void command_pasv(ftp_t *ftp, unsigned int *i);
 void command_pwd(ftp_t *ftp, unsigned int *i);
 void command_quit(ftp_t *ftp, unsigned int *i);
+void command_retr(ftp_t *ftp, unsigned int *i);
 void command_user(ftp_t *ftp, unsigned int *i);
 
 typedef struct {
@@ -38,6 +39,7 @@ static const commands_t cmds[] = {
     {.command = "PASV", .function = &command_pasv, .end = false},
     {.command = "PWD", .function = &command_pwd, .end = false},
     {.command = "QUIT", .function = &command_quit, .end = false},
+    {.command = "RETR", .function = &command_retr, .end = false},
     {.command = "USER", .function = &command_user, .end = false},
     {.command = "", .function = NULL, .end = true}
 };
