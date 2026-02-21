@@ -29,6 +29,7 @@ typedef struct {
     const char *_230;
     const char *_250;
     const char *_331;
+    const char *_421;
     const char *_425;
     const char *_426;
     const char *_500;
@@ -49,6 +50,7 @@ static const status_codes_t status = {
     ._230 = "230 User logged in, proceed."CRLF,
     ._250 = "250 Requested file action okay, completed."CRLF,
     ._331 = "331 User name okay, need password."CRLF,
+    ._421 = "421 Service not available, closing control connection."CRLF,
     ._425 = "425 Can't open data connection."CRLF,
     ._426 = "426 Connection closed."CRLF,
     ._500 = "500 Unknown command."CRLF,

@@ -21,6 +21,7 @@ void command_list(ftp_t *ftp, unsigned int *i);
 void command_noop(ftp_t *ftp, unsigned int *i);
 void command_pass(ftp_t *ftp, unsigned int *i);
 void command_pasv(ftp_t *ftp, unsigned int *i);
+void command_port(ftp_t *ftp, unsigned int *i);
 void command_pwd(ftp_t *ftp, unsigned int *i);
 void command_quit(ftp_t *ftp, unsigned int *i);
 void command_retr(ftp_t *ftp, unsigned int *i);
@@ -42,6 +43,7 @@ static const commands_t cmds[] = {
     {.command = "NOOP", .function = &command_noop, .end = false},
     {.command = "PASS", .function = &command_pass, .end = false},
     {.command = "PASV", .function = &command_pasv, .end = false},
+    {.command = "PORT", .function = &command_port, .end = false},
     {.command = "PWD", .function = &command_pwd, .end = false},
     {.command = "QUIT", .function = &command_quit, .end = false},
     {.command = "RETR", .function = &command_retr, .end = false},

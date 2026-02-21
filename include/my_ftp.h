@@ -20,6 +20,7 @@
 
     #define CLIENTS_INIT_SIZE 50
     #define POLLER_INIT_SIZE 50
+    #define IP_TEMPLATE "xxx.xxx.xxx.xxx"
 
 // For all dynamic arrays (this one and all future ones):
 // amount: current amount of elements in the array
