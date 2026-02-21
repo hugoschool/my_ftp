@@ -19,6 +19,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+static bool close_file_and_return(bool a, int fd)
+{
+    if (fd != -1)
+        close(fd);
+    return a;
+}
+
 static bool send_file(const char *pathname, int fd)
 {
     char *content = NULL;
@@ -28,15 +35,15 @@ static bool send_file(const char *pathname, int fd)
     if (file_fd == -1)
         return false;
     if (fstat(file_fd, &s) == -1)
-        return false;
+        return close_file_and_return(false, file_fd);
     content = malloc(sizeof(char) * s.st_size + 1);
     if (content == NULL)
-        return false;
+        return close_file_and_return(false, file_fd);
     read(file_fd, content, s.st_size);
     content[s.st_size] = '\0';
     write(fd, content, s.st_size);
     free(content);
-    return true;
+    return close_file_and_return(true, file_fd);
 }
 
 static void close_and_error(client_data_t *data)
