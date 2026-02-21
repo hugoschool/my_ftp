@@ -30,7 +30,8 @@ SRC	+=	src/commands/handler.c \
 
 # Utils
 SRC	+=	src/utils/strcmp_start.c \
-		src/utils/strcmp_end.c
+		src/utils/strcmp_end.c \
+		src/utils/remove_crlf.c
 
 OBJ	:=	$(SRC:.c=.o)
 

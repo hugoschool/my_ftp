@@ -7,6 +7,7 @@
 
 #include "my_ftp.h"
 #include "status.h"
+#include "utils.h"
 #include <linux/limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -46,8 +47,7 @@ static void get_path(char *buffer, char **path)
     if (*path == NULL)
         return;
     *path = *path + 1;
-    (*path)[strlen(*path) - 1] = 0;
-    (*path)[strlen(*path) - 1] = 0;
+    remove_crlf(*path);
 }
 
 void command_cwd(ftp_t *ftp, unsigned int *i)

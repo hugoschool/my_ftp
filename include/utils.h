@@ -10,5 +10,6 @@
 
 int strcmp_start(const char *str, const char *start);
 int strcmp_end(const char *str, const char *end);
+void remove_crlf(char *str);
 
 #endif

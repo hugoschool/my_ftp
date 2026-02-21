@@ -7,6 +7,7 @@
 
 #include "my_ftp.h"
 #include "status.h"
+#include "utils.h"
 #include <dirent.h>
 #include <linux/limits.h>
 #include <stdbool.h>
@@ -86,8 +87,7 @@ static void valid_pathname_handle(ftp_t *ftp, unsigned int *i, char *pathname)
     char full_path[PATH_MAX];
 
     pathname = pathname + 1;
-    pathname[strlen(pathname) - 1] = 0;
-    pathname[strlen(pathname) - 1] = 0;
+    remove_crlf(pathname);
     if (!verify_path(ftp, i, pathname, full_path)) {
         WRITE_STATUS(*CLIENT->fd, 550);
         return;
