@@ -54,7 +54,7 @@ bool my_ftp(args_t *args)
 {
     ftp_t *ftp = ftp_init();
 
-    ftp->control_fd = socket_init(args->port);
+    ftp->control_fd = socket_init(NULL, args->port);
     if (ftp->control_fd == -1) {
         ftp_free(ftp);
         return false;

@@ -80,7 +80,7 @@ void clients_adder(clients_t *clients, int *fd);
 void clients_delete(clients_t *clients, int i);
 
 // Sockets
-int socket_init(in_port_t port);
+int socket_init(in_addr_t *addr, in_port_t port);
 
 // Handler
 void client_quit(ftp_t *ftp, unsigned int *i, bool status);

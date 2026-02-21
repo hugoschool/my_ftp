@@ -30,11 +30,14 @@ static int socket_set_options(int socket_fd, struct sockaddr_in *addr)
     return 1;
 }
 
-int socket_init(in_port_t port)
+// If no address is specified, any will be picked.
+// To auto pick an address, use port 0 (man 2 bind)
+int socket_init(in_addr_t *addr, in_port_t port)
 {
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in server_addr = {.sin_family = AF_INET,
-        .sin_port = htons(port), .sin_addr = {.s_addr = INADDR_ANY}};
+        .sin_port = htons(port),
+        .sin_addr = {.s_addr = addr != NULL ? *addr : INADDR_ANY}};
 
     if (socket_fd < 0) {
         perror("socket");
