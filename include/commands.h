@@ -15,6 +15,7 @@
 
 void command_cdup(ftp_t *ftp, unsigned int *i);
 void command_cwd(ftp_t *ftp, unsigned int *i);
+void command_dele(ftp_t *ftp, unsigned int *i);
 void command_help(ftp_t *ftp, unsigned int *i);
 void command_list(ftp_t *ftp, unsigned int *i);
 void command_noop(ftp_t *ftp, unsigned int *i);
@@ -35,6 +36,7 @@ typedef struct {
 static const commands_t cmds[] = {
     {.command = "CDUP", .function = &command_cdup, .end = false},
     {.command = "CWD", .function = &command_cwd, .end = false},
+    {.command = "DELE", .function = &command_dele, .end = false},
     {.command = "HELP", .function = &command_help, .end = false},
     {.command = "LIST", .function = &command_list, .end = false},
     {.command = "NOOP", .function = &command_noop, .end = false},

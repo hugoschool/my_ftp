@@ -28,6 +28,7 @@ SRC	+=	src/commands/handler.c \
 		src/commands/list.c \
 		src/commands/retr.c \
 		src/commands/stor.c \
+		src/commands/dele.c \
 		src/commands/help.c
 
 # Utils
