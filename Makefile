@@ -27,6 +27,7 @@ SRC	+=	src/commands/handler.c \
 		src/commands/pasv.c \
 		src/commands/list.c \
 		src/commands/retr.c \
+		src/commands/stor.c \
 		src/commands/help.c
 
 # Utils
