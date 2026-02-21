@@ -29,11 +29,13 @@ SRC	+=	src/commands/handler.c \
 		src/commands/retr.c \
 		src/commands/stor.c \
 		src/commands/dele.c \
+		src/commands/port.c \
 		src/commands/help.c
 
 # Utils
 SRC	+=	src/utils/strcmp_start.c \
 		src/utils/strcmp_end.c \
+		src/utils/strccount.c \
 		src/utils/remove_crlf.c
 
 OBJ	:=	$(SRC:.c=.o)
