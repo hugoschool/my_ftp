@@ -10,7 +10,6 @@
 #include "utils.h"
 #include <linux/limits.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -23,7 +22,9 @@ static void full_appended_path(char new[], const char *initial,
     if (strlen(given) > 0 && given[0] == '/') {
         strcat(new, given);
     } else {
-        strcat(new, client);
+        if (strcmp(client, "/") != 0)
+            strcat(new, client);
+        strcat(new, "/");
         strcat(new, given);
     }
 }
