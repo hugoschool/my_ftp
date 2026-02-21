@@ -26,7 +26,8 @@ SRC	+=	src/commands/handler.c \
 		src/commands/cdup.c \
 		src/commands/pasv.c \
 		src/commands/list.c \
-		src/commands/retr.c
+		src/commands/retr.c \
+		src/commands/help.c
 
 # Utils
 SRC	+=	src/utils/strcmp_start.c \

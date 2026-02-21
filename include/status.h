@@ -21,6 +21,7 @@
 typedef struct {
     const char *_150;
     const char *_200;
+    const char *_214_all;
     const char *_220;
     const char *_221;
     const char *_226;
@@ -40,6 +41,7 @@ typedef struct {
 static const status_codes_t status = {
     ._150 = "150 File status okay; about to open data connection."CRLF,
     ._200 = "200 Command okay."CRLF,
+    ._214_all = "214 Here's a list of available commands:"CRLF,
     ._220 = "220 Service ready for new user."CRLF,
     ._221 = "221 Service closing control connection."CRLF,
     ._226 = "226 Closing data connection."CRLF,
