@@ -33,7 +33,8 @@ static void get_formatted_port(in_port_t *port, int *p1, int *p2)
     *p2 = net_port - (*p1 * 256);
 }
 
-static void validate_pasv(client_data_t *data, struct in_addr *in, in_port_t port)
+static void validate_pasv(client_data_t *data, struct in_addr *in,
+    in_port_t port)
 {
     char *ip = get_formatted_ip(inet_ntoa(*in));
     int p1 = -1;

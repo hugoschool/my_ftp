@@ -50,7 +50,6 @@ static void child_process(ftp_t *ftp, unsigned int *i)
         perror("accept");
         close_and_error(ftp, i, fd);
     }
-    printf("File descriptor is %d\n", fd);
     if (!list_all_files(fd, ftp->initial_path, CLIENT->path))
         close_and_error(ftp, i, fd);
     WRITE_STATUS(*CLIENT->fd, 226);
@@ -58,13 +57,15 @@ static void child_process(ftp_t *ftp, unsigned int *i)
     exit(0);
 }
 
-// No parent_process or whole server waits for a response.
+// Parent process assumes everything went well and closes the data socket.
 static void fork_process(ftp_t *ftp, unsigned int *i)
 {
     pid_t pid = fork();
 
     if (pid == 0) {
         child_process(ftp, i);
+    } else {
+        close_data_socket(ftp, i, -1);
     }
 }
 
