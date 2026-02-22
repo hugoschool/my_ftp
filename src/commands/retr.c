@@ -68,13 +68,15 @@ static void child_process(ftp_t *ftp, unsigned int *i, const char *pathname)
     exit(0);
 }
 
-// No parent_process or whole server waits for a response.
+// Parent process assumes everything went well and closes the data socket.
 static void fork_process(ftp_t *ftp, unsigned int *i, const char *pathname)
 {
     pid_t pid = fork();
 
     if (pid == 0) {
         child_process(ftp, i, pathname);
+    } else {
+        close_data_socket(ftp, i, -1);
     }
 }
 

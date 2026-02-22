@@ -67,5 +67,4 @@ void client_data_close_data_socket(client_data_t *data)
     if (data->data_fd != -1)
         close(data->data_fd);
     data->data_fd = -1;
-    printf("data fd after close: %d\n", data->data_fd);
 }
