@@ -45,11 +45,18 @@ typedef enum {
     LOGGED_IN
 } login_step_t;
 
+typedef enum {
+    PASSIVE,
+    ACTIVE,
+    NO_MODE
+} data_mode_t;
+
 typedef struct {
     // Pointer to its struct pollfd file descriptor
     int *fd;
     char *path;
     int data_fd;
+    data_mode_t data_mode;
     login_step_t login_step;
 } client_data_t;
 
@@ -82,6 +89,8 @@ void clients_delete(clients_t *clients, int i);
 
 // Sockets
 int socket_init(in_addr_t *addr, in_port_t port);
+int get_data_socket(ftp_t *ftp, unsigned int *i);
+void close_data_socket(ftp_t *ftp, unsigned int *i, int fd);
 
 // Handler
 void client_quit(ftp_t *ftp, unsigned int *i, bool status);

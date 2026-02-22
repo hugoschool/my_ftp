@@ -27,6 +27,7 @@ client_data_t *client_data_init(int *fd)
     }
     data->data_fd = -1;
     data->login_step = LOGGED_OUT;
+    data->data_mode = NO_MODE;
     return data;
 }
 
@@ -58,9 +59,13 @@ void client_data_change_path(client_data_t *data, const char *full_path,
     }
 }
 
+// This function shouldn't really be used as is unless needed.
+// It's probably better to use `close_data_socket` instead.
 void client_data_close_data_socket(client_data_t *data)
 {
+    data->data_mode = NO_MODE;
     if (data->data_fd != -1)
         close(data->data_fd);
     data->data_fd = -1;
+    printf("data fd after close: %d\n", data->data_fd);
 }

@@ -33,14 +33,15 @@ static void get_formatted_port(in_port_t *port, int *p1, int *p2)
     *p2 = net_port - (*p1 * 256);
 }
 
-static void print_status(int fd, struct in_addr *in, in_port_t port)
+static void validate_pasv(client_data_t *data, struct in_addr *in, in_port_t port)
 {
     char *ip = get_formatted_ip(inet_ntoa(*in));
     int p1 = -1;
     int p2 = -1;
 
     get_formatted_port(&port, &p1, &p2);
-    dprintf(fd, GET_STATUS(227), ip, p1, p2);
+    data->data_mode = PASSIVE;
+    dprintf(*data->fd, GET_STATUS(227), ip, p1, p2);
 }
 
 void command_pasv(ftp_t *ftp, unsigned int *i)
@@ -53,7 +54,7 @@ void command_pasv(ftp_t *ftp, unsigned int *i)
         return;
     }
     if (CLIENT->data_fd != -1)
-        client_data_close_data_socket(CLIENT);
+        close_data_socket(ftp, i, -1);
     CLIENT->data_fd = socket_init(NULL, 0);
     if (CLIENT->data_fd == -1) {
         WRITE_STATUS(*CLIENT->fd, 425);
@@ -63,5 +64,5 @@ void command_pasv(ftp_t *ftp, unsigned int *i)
         WRITE_STATUS(*CLIENT->fd, 425);
         return;
     }
-    return print_status(*CLIENT->fd, &data.sin_addr, data.sin_port);
+    return validate_pasv(CLIENT, &data.sin_addr, data.sin_port);
 }

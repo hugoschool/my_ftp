@@ -35,27 +35,26 @@ static bool list_all_files(int fd, const char *initial_path, char *path)
     return true;
 }
 
-static void close_and_error(client_data_t *data)
+static void close_and_error(ftp_t *ftp, unsigned int *i, int fd)
 {
-    client_data_close_data_socket(data);
-    WRITE_STATUS(*data->fd, 426);
+    close_data_socket(ftp, i, fd);
+    WRITE_STATUS(*CLIENT->fd, 426);
     exit(1);
 }
 
 static void child_process(ftp_t *ftp, unsigned int *i)
 {
-    struct sockaddr_in caddr;
-    socklen_t caddrl = sizeof(caddr);
-    int cfd = accept(CLIENT->data_fd, (struct sockaddr *)&caddr, &caddrl);
+    int fd = get_data_socket(ftp, i);
 
-    if (cfd == -1) {
+    if (fd == -1) {
         perror("accept");
-        close_and_error(CLIENT);
+        close_and_error(ftp, i, fd);
     }
-    if (!list_all_files(cfd, ftp->initial_path, CLIENT->path))
-        close_and_error(CLIENT);
+    printf("File descriptor is %d\n", fd);
+    if (!list_all_files(fd, ftp->initial_path, CLIENT->path))
+        close_and_error(ftp, i, fd);
     WRITE_STATUS(*CLIENT->fd, 226);
-    client_data_close_data_socket(CLIENT);
+    close_data_socket(ftp, i, fd);
     exit(0);
 }
 
@@ -76,7 +75,7 @@ void command_list(ftp_t *ftp, unsigned int *i)
         WRITE_STATUS(*CLIENT->fd, 530_out);
         return;
     }
-    if (CLIENT->data_fd == -1) {
+    if (CLIENT->data_mode == NO_MODE) {
         WRITE_STATUS(*CLIENT->fd, 425);
         return;
     }

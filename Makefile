@@ -9,6 +9,7 @@ endif
 SRC	:=	src/main.c \
 		src/args.c \
 		src/my_ftp.c \
+		src/data.c \
 		src/poller.c \
 		src/socket.c \
 		src/handler.c \
