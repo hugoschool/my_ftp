@@ -80,6 +80,7 @@ static void create_data_socket(ftp_t *ftp, unsigned int *i,
         WRITE_STATUS(*CLIENT->fd, 421);
         return;
     }
+    CLIENT->data_mode = ACTIVE;
     WRITE_STATUS(*CLIENT->fd, 200);
 }
 
