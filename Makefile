@@ -15,6 +15,7 @@ SRC	:=	src/main.c \
 		src/handler.c \
 		src/client.c \
 		src/client_data.c \
+		src/buffer.c
 
 # Commands
 SRC	+=	src/commands/handler.c \

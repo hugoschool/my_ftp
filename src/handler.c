@@ -56,19 +56,27 @@ void client_quit(ftp_t *ftp, unsigned int *i, bool print)
     }
 }
 
-// TODO: buffer should also be cleared here
-// TODO: make big circular buffer xd
 void client_handler(ftp_t *ftp, unsigned int *i)
 {
+    size_t read_i = 0;
     int fd = ftp->poller->fds[*i].fd;
-    int bytes_read = read(fd, ftp->buffer, BUFFER_SIZE);
+    ssize_t bytes_read = 0;
+    char buffer[BUFFER_SIZE + 1];
 
-    if (bytes_read <= 0) {
-        client_quit(ftp, i, false);
-    } else {
-        ftp->buffer[bytes_read] = 0;
-        commands_handler(ftp, i);
+    buffer_clear(ftp->buffer_handler);
+    while (true) {
+        memset(buffer, 0, BUFFER_SIZE + 1);
+        bytes_read = read(fd, buffer, BUFFER_SIZE);
+        if (bytes_read <= 0 && read_i == 0)
+            return client_quit(ftp, i, false);
+        buffer[bytes_read] = 0;
+        buffer_append(ftp->buffer_handler, buffer, bytes_read);
+        if (bytes_read < BUFFER_SIZE)
+            break;
+        read_i++;
     }
+    while (buffer_set_current_command(ftp->buffer_handler, ftp))
+        commands_handler(ftp, i);
 }
 
 static void handle_pollin_events(ftp_t *ftp, unsigned int *i)

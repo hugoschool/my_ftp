@@ -67,12 +67,23 @@ typedef struct {
 } clients_t;
 
 typedef struct {
+    char *buffer;
+    size_t amount;
+    size_t size;
+    // Previous command pointer
+    char *previous;
+} buffer_t;
+
+typedef struct {
     poller_t *poller;
     // CONTROL socket aka the main server socket
     int control_fd;
     const char *initial_path;
     clients_t *clients;
-    char buffer[BUFFER_SIZE];
+    // This "buffer" holds the current command being processed
+    char *buffer;
+    // Handles the previous buffer commands
+    buffer_t *buffer_handler;
 } ftp_t;
 
 // Clients data
@@ -95,6 +106,13 @@ void close_data_socket(ftp_t *ftp, unsigned int *i, int fd);
 // Handler
 void client_quit(ftp_t *ftp, unsigned int *i, bool status);
 void poll_handler(ftp_t *ftp);
+
+// Buffer
+buffer_t *buffer_init(void);
+void buffer_free(buffer_t *buffer);
+void buffer_append(buffer_t *buffer, char *str, size_t len);
+void buffer_clear(buffer_t *buffer);
+bool buffer_set_current_command(buffer_t *buffer, ftp_t *ftp);
 
 // FTP
 // Returns false in case of an error

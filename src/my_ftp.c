@@ -23,12 +23,17 @@ static ftp_t *ftp_init(void)
     ftp->control_fd = -1;
     ftp->initial_path = NULL;
     ftp->clients = clients_init();
+    ftp->buffer = NULL;
+    ftp->buffer_handler = buffer_init();
     return ftp;
 }
 
 void ftp_free(ftp_t *ftp)
 {
     poller_free(ftp->poller);
+    buffer_free(ftp->buffer_handler);
+    if (ftp->buffer)
+        free(ftp->buffer);
     if (ftp->control_fd != -1)
         close(ftp->control_fd);
     free((void *)ftp->initial_path);
