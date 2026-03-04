@@ -1,11 +1,17 @@
+import os
 import socket
 import time
+
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 HOST = "127.0.0.1"
 PORT = 4242
 
 CRLF = b"\r\n"
 BUFFER_SIZE = 1024
+
+JUSTAFILE_CONTENT = "Hello this is just a test for WTFTP!"
+IWROTETHISFILE_CONTENT = "Yeah I just wrote this and it's pretty\ngood lol!"
 
 class BufferVerify:
     @staticmethod
@@ -18,8 +24,14 @@ class BufferVerify:
 
 class Utils:
     @staticmethod
-    def getPasvPort(buffer):
-        pass
+    def getPasvPort(buffer) -> Optional[int]:
+        port = 0
+        splitted = buffer.split(",")
+
+        if len(splitted) != 6:
+            return None
+
+        return int(splitted[4]) * 256 + int(splitted[5].split(")")[0])
 
 class SocketTest:
     def __init__(self, s = None):
@@ -182,6 +194,52 @@ class MultipleConnectionTest(SocketTest):
                 return False
         return True
 
+class RetrPassiveTest(SocketTest):
+    def __init__(self):
+        super().__init__()
+        self.dataSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    def close(self):
+        super().close()
+        self.dataSocket.close()
+
+    def test(self):
+        self.connectAndIgnore()
+        if not self.authentificate():
+            self.close()
+            return False
+
+        self.socket.send(b"PASV\r\n")
+        data = self.socket.recv(BUFFER_SIZE)
+
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 227)
+        if b == False:
+            self.close()
+            return False
+
+        pasvPort = Utils.getPasvPort(data.decode("utf-8"))
+        if pasvPort is None:
+            self.close()
+            return False
+
+        self.socket.send(b"RETR tests/wtftp-tests/justafile\r\n")
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 150)
+        if b == False:
+            self.close()
+            return False
+
+        self.dataSocket.connect((HOST, pasvPort))
+        dataSocketData = self.dataSocket.recv(BUFFER_SIZE)
+        if dataSocketData != JUSTAFILE_CONTENT.encode():
+            self.close()
+            return
+
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 226)
+        self.close()
+        return b
+
 class TestWrapper:
     def __init__(self):
         self.passed_tests = 0
@@ -200,6 +258,14 @@ class TestWrapper:
         else:
             self.failed_tests += 1
 
+    def prepare(self):
+        with open(os.path.join(BASE_DIR, "wtftp-tests", "justafile"), "w") as f:
+            f.write(JUSTAFILE_CONTENT)
+
+        writtenFile = os.path.join(BASE_DIR, "wtftp-tests", "iwrotethisfile")
+        if os.path.exists(writtenFile):
+            os.remove(writtenFile)
+
     def test(self):
         self.execute(SimpleConnectionTest())
         self.execute(HelpTest())
@@ -209,6 +275,7 @@ class TestWrapper:
         self.execute(SendingBeforeAuthTest())
         self.execute(WrongCommandTest())
         self.execute(NoOperationTest())
+        self.execute(RetrPassiveTest())
 
     def display(self):
         print(f"Passed: {self.passed_tests}, Failed: {self.failed_tests}")
@@ -218,9 +285,12 @@ def main():
     print("--------------------------------------------------------")
     print()
 
+    print("For now, please launch `./myftp 4242 .` from the original my_ftp folder")
+
     print(f"Connecting to {HOST}:{PORT}")
 
     wrapper = TestWrapper()
+    wrapper.prepare()
     wrapper.test()
     wrapper.display()
 
