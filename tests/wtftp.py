@@ -194,7 +194,7 @@ class MultipleConnectionTest(SocketTest):
                 return False
         return True
 
-class RetrPassiveTest(SocketTest):
+class DataSocketTest(SocketTest):
     def __init__(self):
         super().__init__()
         self.dataSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -203,53 +203,26 @@ class RetrPassiveTest(SocketTest):
         super().close()
         self.dataSocket.close()
 
-    def test(self):
+    def passiveConnection(self) -> Optional[int]:
         self.connectAndIgnore()
         if not self.authentificate():
             self.close()
-            return False
+            return None
 
         self.socket.send(b"PASV\r\n")
         data = self.socket.recv(BUFFER_SIZE)
 
         b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 227)
         if b == False:
-            self.close()
-            return False
+            return None
 
         pasvPort = Utils.getPasvPort(data.decode("utf-8"))
         if pasvPort is None:
-            self.close()
-            return False
+            return None
 
-        self.socket.send(b"RETR tests/wtftp-tests/justafile\r\n")
-        data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 150)
-        if b == False:
-            self.close()
-            return False
+        return pasvPort
 
-        self.dataSocket.connect((HOST, pasvPort))
-        dataSocketData = self.dataSocket.recv(BUFFER_SIZE)
-        if dataSocketData != JUSTAFILE_CONTENT.encode():
-            self.close()
-            return
-
-        data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 226)
-        self.close()
-        return b
-
-class RetrActiveTest(SocketTest):
-    def __init__(self):
-        super().__init__()
-        self.dataSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    def close(self):
-        super().close()
-        self.dataSocket.close()
-
-    def test(self):
+    def activeConnection(self) -> bool:
         self.connectAndIgnore()
         if not self.authentificate():
             self.close()
@@ -268,6 +241,20 @@ class RetrActiveTest(SocketTest):
             self.close()
             return False
 
+        return True
+
+    def activeAccept(self) -> socket:
+        self.dataSocket.settimeout(5) # Max 5 second timeout for the accept
+        acceptedSocket = self.dataSocket.accept()
+        return acceptedSocket[0]
+
+class RetrPassiveTest(DataSocketTest):
+    def test(self):
+        dataPort = self.passiveConnection()
+        if not dataPort:
+            self.close()
+            return False
+
         self.socket.send(b"RETR tests/wtftp-tests/justafile\r\n")
         data = self.socket.recv(BUFFER_SIZE)
         b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 150)
@@ -275,9 +262,31 @@ class RetrActiveTest(SocketTest):
             self.close()
             return False
 
-        self.dataSocket.settimeout(5) # Max 5 second timeout for the accept
-        acceptedSocket = self.dataSocket.accept()
-        dataSocketData = acceptedSocket[0].recv(BUFFER_SIZE)
+        self.dataSocket.connect((HOST, dataPort))
+        dataSocketData = self.dataSocket.recv(BUFFER_SIZE)
+        if dataSocketData != JUSTAFILE_CONTENT.encode():
+            self.close()
+            return
+
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 226)
+        self.close()
+        return b
+
+class RetrActiveTest(DataSocketTest):
+    def test(self):
+        if not self.activeConnection():
+            self.close()
+            return False
+
+        self.socket.send(b"RETR tests/wtftp-tests/justafile\r\n")
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 150)
+        if b == False:
+            self.close()
+            return False
+
+        dataSocketData = self.activeAccept().recv(BUFFER_SIZE)
         if dataSocketData != JUSTAFILE_CONTENT.encode():
             self.close()
             return
@@ -334,8 +343,8 @@ def main():
     print()
 
     print("For now, please launch `./myftp 4242 .` from the original my_ftp folder")
-
     print(f"Connecting to {HOST}:{PORT}")
+    print()
 
     wrapper = TestWrapper()
     wrapper.prepare()
