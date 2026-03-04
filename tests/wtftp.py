@@ -12,6 +12,13 @@ BUFFER_SIZE = 1024
 
 JUSTAFILE_CONTENT = "Hello this is just a test for WTFTP!"
 IWROTETHISFILE_CONTENT = "Yeah I just wrote this and it's pretty\ngood lol!"
+LIST_FILES = [
+    b"file1",
+    b"file2",
+    b"file3",
+    b"file4",
+    b"anotherdirectory",
+]
 
 class BufferVerify:
     @staticmethod
@@ -296,6 +303,74 @@ class RetrActiveTest(DataSocketTest):
         self.close()
         return b
 
+class ListPassiveTest(DataSocketTest):
+    def test(self):
+        dataPort = self.passiveConnection()
+        if not dataPort:
+            self.close()
+            return False
+
+        self.socket.send(b"CWD tests/wtftp-tests/something\r\n")
+        self.socket.recv(BUFFER_SIZE)
+
+        self.socket.send(b"LIST\r\n")
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 150)
+        if b == False:
+            self.close()
+            return False
+
+        self.dataSocket.connect((HOST, dataPort))
+
+        fullData = b""
+        dataSocketData = self.dataSocket.recv(BUFFER_SIZE)
+        while len(dataSocketData) > 0:
+            fullData += dataSocketData
+            dataSocketData = self.dataSocket.recv(BUFFER_SIZE)
+
+        for file in LIST_FILES:
+            if file not in fullData:
+                self.close()
+                return False
+
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 226)
+        self.close()
+        return b
+
+class ListActiveTest(DataSocketTest):
+    def test(self):
+        if not self.activeConnection():
+            self.close()
+            return False
+
+        self.socket.send(b"CWD tests/wtftp-tests/something\r\n")
+        self.socket.recv(BUFFER_SIZE)
+
+        self.socket.send(b"LIST\r\n")
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 150)
+        if b == False:
+            self.close()
+            return False
+
+        acceptedSocket = self.activeAccept()
+        fullData = b""
+        dataSocketData = acceptedSocket.recv(BUFFER_SIZE)
+        while len(dataSocketData) > 0:
+            fullData += dataSocketData
+            dataSocketData = acceptedSocket.recv(BUFFER_SIZE)
+
+        for file in LIST_FILES:
+            if file not in fullData:
+                self.close()
+                return False
+
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 226)
+        self.close()
+        return b
+
 class TestWrapper:
     def __init__(self):
         self.passed_tests = 0
@@ -318,6 +393,22 @@ class TestWrapper:
         with open(os.path.join(BASE_DIR, "wtftp-tests", "justafile"), "w") as f:
             f.write(JUSTAFILE_CONTENT)
 
+        # For the LIST test
+        DIRECTORY = os.path.join(BASE_DIR, "wtftp-tests", "something")
+        if not os.path.exists(DIRECTORY):
+            os.mkdir(DIRECTORY)
+            files = [
+                os.path.join(DIRECTORY, "file1"),
+                os.path.join(DIRECTORY, "file2"),
+                os.path.join(DIRECTORY, "file3"),
+                os.path.join(DIRECTORY, "file4"),
+            ]
+            for file in files:
+                with open(file, "w") as f:
+                    f.write("a")
+            os.mkdir(os.path.join(DIRECTORY, "anotherdirectory"))
+
+        # For the STOR test
         writtenFile = os.path.join(BASE_DIR, "wtftp-tests", "iwrotethisfile")
         if os.path.exists(writtenFile):
             os.remove(writtenFile)
@@ -333,6 +424,11 @@ class TestWrapper:
         self.execute(NoOperationTest())
         self.execute(RetrPassiveTest())
         self.execute(RetrActiveTest())
+        self.execute(ListPassiveTest())
+        self.execute(ListActiveTest())
+        # TODO: Uploading files
+        # TODO: Deleting files
+        # TODO: Working directory
 
     def display(self):
         print(f"Passed: {self.passed_tests}, Failed: {self.failed_tests}")
