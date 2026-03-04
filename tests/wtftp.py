@@ -240,6 +240,53 @@ class RetrPassiveTest(SocketTest):
         self.close()
         return b
 
+class RetrActiveTest(SocketTest):
+    def __init__(self):
+        super().__init__()
+        self.dataSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    def close(self):
+        super().close()
+        self.dataSocket.close()
+
+    def test(self):
+        self.connectAndIgnore()
+        if not self.authentificate():
+            self.close()
+            return False
+
+        dataPort = 38592
+        self.dataSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.dataSocket.bind((HOST, dataPort))
+        self.dataSocket.listen(2)
+
+        self.socket.send(b"PORT 0,0,0,0,150,192\r\n")
+        data = self.socket.recv(BUFFER_SIZE)
+
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 200)
+        if b == False:
+            self.close()
+            return False
+
+        self.socket.send(b"RETR tests/wtftp-tests/justafile\r\n")
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 150)
+        if b == False:
+            self.close()
+            return False
+
+        self.dataSocket.settimeout(5) # Max 5 second timeout for the accept
+        acceptedSocket = self.dataSocket.accept()
+        dataSocketData = acceptedSocket[0].recv(BUFFER_SIZE)
+        if dataSocketData != JUSTAFILE_CONTENT.encode():
+            self.close()
+            return
+
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 226)
+        self.close()
+        return b
+
 class TestWrapper:
     def __init__(self):
         self.passed_tests = 0
@@ -276,6 +323,7 @@ class TestWrapper:
         self.execute(WrongCommandTest())
         self.execute(NoOperationTest())
         self.execute(RetrPassiveTest())
+        self.execute(RetrActiveTest())
 
     def display(self):
         print(f"Passed: {self.passed_tests}, Failed: {self.failed_tests}")
