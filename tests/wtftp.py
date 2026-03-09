@@ -1,11 +1,19 @@
 import os
 import socket
 import time
+import random
+import threading
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
+TESTS_DIRNAME = "wtftp-tests"
+TESTS_DIR = os.path.join(BASE_DIR, TESTS_DIRNAME)
+
+MYFTP_DIR = os.path.join(BASE_DIR, "..")
+MYFTP_FILE = os.path.join(MYFTP_DIR, "myftp")
+
 HOST = "127.0.0.1"
-PORT = 4242
+PORT = random.randint(4000, 6000)
 
 CRLF = b"\r\n"
 BUFFER_SIZE = 1024
@@ -279,7 +287,7 @@ class RetrPassiveTest(DataSocketTest):
             self.close()
             return False
 
-        self.socket.send(b"RETR tests/wtftp-tests/justafile\r\n")
+        self.socket.send(f"RETR {TESTS_DIRNAME}/justafile\r\n".encode())
         data = self.socket.recv(BUFFER_SIZE)
         b = BufferVerify.statusCode(data, 150)
         if b == False:
@@ -303,7 +311,7 @@ class RetrActiveTest(DataSocketTest):
             self.close()
             return False
 
-        self.socket.send(b"RETR tests/wtftp-tests/justafile\r\n")
+        self.socket.send(f"RETR {TESTS_DIRNAME}/justafile\r\n".encode())
         data = self.socket.recv(BUFFER_SIZE)
         b = BufferVerify.statusCode(data, 150)
         if b == False:
@@ -327,7 +335,7 @@ class ListPassiveTest(DataSocketTest):
             self.close()
             return False
 
-        self.socket.send(b"CWD tests/wtftp-tests/something\r\n")
+        self.socket.send(f"CWD {TESTS_DIRNAME}/something\r\n".encode())
         self.socket.recv(BUFFER_SIZE)
 
         self.socket.send(b"LIST\r\n")
@@ -361,7 +369,7 @@ class ListActiveTest(DataSocketTest):
             self.close()
             return False
 
-        self.socket.send(b"CWD tests/wtftp-tests/something\r\n")
+        self.socket.send(f"CWD {TESTS_DIRNAME}/something\r\n".encode())
         self.socket.recv(BUFFER_SIZE)
 
         self.socket.send(b"LIST\r\n")
@@ -440,11 +448,14 @@ class TestWrapper:
             self.failed_tests += 1
 
     def prepare(self):
-        with open(os.path.join(BASE_DIR, "wtftp-tests", "justafile"), "w") as f:
+        if not TESTS_DIR:
+            os.mkdir(TESTS_DIR)
+
+        with open(os.path.join(TESTS_DIR, "justafile"), "w") as f:
             f.write(JUSTAFILE_CONTENT)
 
         # For the LIST test
-        DIRECTORY = os.path.join(BASE_DIR, "wtftp-tests", "something")
+        DIRECTORY = os.path.join(TESTS_DIR, "something")
         if not os.path.exists(DIRECTORY):
             os.mkdir(DIRECTORY)
             files = [
@@ -459,7 +470,7 @@ class TestWrapper:
             os.mkdir(os.path.join(DIRECTORY, "anotherdirectory"))
 
         # For the STOR test
-        writtenFile = os.path.join(BASE_DIR, "wtftp-tests", "iwrotethisfile")
+        writtenFile = os.path.join(TESTS_DIR, "iwrotethisfile")
         if os.path.exists(writtenFile):
             os.remove(writtenFile)
 
@@ -485,14 +496,38 @@ class TestWrapper:
     def display(self):
         print(f"Passed: {Colors.GREEN}{self.passed_tests}{Colors.RESET}, Failed: {Colors.RED}{self.failed_tests}{Colors.RESET}")
 
+class myFTP:
+    def __init__(self):
+        pass
+
+    def run(self):
+        try:
+            pid = os.fork()
+        except OSError, e:
+            print("Couldn't fork to launch myftp, closing.")
+            sys.exit(1)
+
+        if pid == 0:
+            # Redirect all outputs to /dev/null
+            fd = os.open("/dev/null", os.O_WRONLY)
+            os.dup2(fd, 1)
+            os.dup2(fd, 2)
+            os.execv(MYFTP_FILE, [MYFTP_FILE, str(PORT), BASE_DIR])
+        else:
+            # Wait for server to be up to run
+            time.sleep(3)
+
 def main():
+    # TODO: precise ftp binary via argv
     print(Colors.PURPLE, end="")
     print("WTFTP: What The File (Transfer Protocol) Testing Program")
     print("--------------------------------------------------------")
     print(Colors.RESET, end="")
     print()
 
-    print("For now, please launch `./myftp 4242 .` from the original my_ftp folder")
+    myftp_bin = myFTP()
+    myftp_bin.run()
+
     print(f"Connecting to {HOST}:{PORT}")
     print()
 
