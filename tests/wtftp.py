@@ -3,6 +3,7 @@ import socket
 import time
 import random
 import threading
+import sys
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -10,7 +11,6 @@ TESTS_DIRNAME = "wtftp-tests"
 TESTS_DIR = os.path.join(BASE_DIR, TESTS_DIRNAME)
 
 MYFTP_DIR = os.path.join(BASE_DIR, "..")
-MYFTP_FILE = os.path.join(MYFTP_DIR, "myftp")
 
 HOST = "127.0.0.1"
 PORT = random.randint(4000, 6000)
@@ -57,7 +57,7 @@ class BufferVerify:
 
 class Utils:
     @staticmethod
-    def getPasvPort(buffer) -> Optional[int]:
+    def getPasvPort(buffer) -> int | None:
         port = 0
         splitted = buffer.split(",")
 
@@ -238,7 +238,7 @@ class DataSocketTest(SocketTest):
         super().close()
         self.dataSocket.close()
 
-    def passiveConnection(self) -> Optional[int]:
+    def passiveConnection(self) -> int | None:
         self.connectAndIgnore()
         if not self.authentificate():
             self.close()
@@ -442,13 +442,14 @@ class TestWrapper:
     def execute(self, test: SocketTest, name: str = None):
         if self._executeTest(test):
             self.passed_tests += 1
+            print(f"{Colors.GREEN}{name} passed{Colors.RESET}")
         else:
             print(f"{Colors.RED}{name} failed{Colors.RESET}")
             print()
             self.failed_tests += 1
 
     def prepare(self):
-        if not TESTS_DIR:
+        if not os.path.exists(TESTS_DIR):
             os.mkdir(TESTS_DIR)
 
         with open(os.path.join(TESTS_DIR, "justafile"), "w") as f:
@@ -497,13 +498,16 @@ class TestWrapper:
         print(f"Passed: {Colors.GREEN}{self.passed_tests}{Colors.RESET}, Failed: {Colors.RED}{self.failed_tests}{Colors.RESET}")
 
 class myFTP:
-    def __init__(self):
-        pass
+    def __init__(self, file: str):
+        self.file = file
+
+        if not os.access(self.file, os.X_OK):
+            raise Exception("File is not executable")
 
     def run(self):
         try:
             pid = os.fork()
-        except OSError, e:
+        except:
             print("Couldn't fork to launch myftp, closing.")
             sys.exit(1)
 
@@ -512,20 +516,24 @@ class myFTP:
             fd = os.open("/dev/null", os.O_WRONLY)
             os.dup2(fd, 1)
             os.dup2(fd, 2)
-            os.execv(MYFTP_FILE, [MYFTP_FILE, str(PORT), BASE_DIR])
+            os.execv(self.file, [self.file, str(PORT), BASE_DIR])
         else:
             # Wait for server to be up to run
             time.sleep(3)
 
 def main():
-    # TODO: precise ftp binary via argv
+    if len(sys.argv) == 3 and sys.argv[1] == "-c":
+        MYFTP_FILE = os.path.realpath(sys.argv[2])
+    else:
+        MYFTP_FILE = os.path.join(MYFTP_DIR, "myftp")
+
     print(Colors.PURPLE, end="")
     print("WTFTP: What The File (Transfer Protocol) Testing Program")
     print("--------------------------------------------------------")
     print(Colors.RESET, end="")
     print()
 
-    myftp_bin = myFTP()
+    myftp_bin = myFTP(MYFTP_FILE)
     myftp_bin.run()
 
     print(f"Connecting to {HOST}:{PORT}")
