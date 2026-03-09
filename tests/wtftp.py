@@ -64,6 +64,7 @@ class SocketTest:
             self.socket = s
         else:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(15)
 
     def connect(self):
         self.socket.connect((HOST, PORT))
@@ -223,6 +224,7 @@ class DataSocketTest(SocketTest):
     def __init__(self):
         super().__init__()
         self.dataSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.dataSocket.settimeout(30)
 
     def close(self):
         super().close()
