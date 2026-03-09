@@ -4,6 +4,7 @@ import time
 import random
 import threading
 import sys
+import signal
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -40,6 +41,7 @@ class BufferVerify:
         return_value = BufferVerify.ending(buffer) and buffer.startswith(str(statusCode).encode())
 
         if return_value is False:
+            print()
             print("Buffer does not have the right status code")
             print(f"    Given: {buffer}")
             print(f"    Expected status code: {statusCode}")
@@ -500,18 +502,19 @@ class TestWrapper:
 class myFTP:
     def __init__(self, file: str):
         self.file = file
+        self.pid = -1
 
         if not os.access(self.file, os.X_OK):
             raise Exception("File is not executable")
 
     def run(self):
         try:
-            pid = os.fork()
+            self.pid = os.fork()
         except:
             print("Couldn't fork to launch myftp, closing.")
             sys.exit(1)
 
-        if pid == 0:
+        if self.pid == 0:
             # Redirect all outputs to /dev/null
             fd = os.open("/dev/null", os.O_WRONLY)
             os.dup2(fd, 1)
@@ -520,6 +523,14 @@ class myFTP:
         else:
             # Wait for server to be up to run
             time.sleep(3)
+
+    def close(self):
+        if self.pid != -1:
+            try:
+                os.kill(self.pid, signal.SIGTERM)
+            except OSError:
+                print(f"Had a problem closing {self.file}")
+                sys.exit(1)
 
 def main():
     if len(sys.argv) == 3 and sys.argv[1] == "-c":
@@ -543,6 +554,8 @@ def main():
     wrapper.prepare()
     wrapper.test()
     wrapper.display()
+
+    myftp_bin.close()
 
 if __name__ == "__main__":
     main()
