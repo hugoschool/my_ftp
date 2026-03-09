@@ -464,6 +464,36 @@ class StorPassiveTest(StorTests):
         self.close()
         return b
 
+class DeleValidFileTest(SocketTest):
+    def test(self):
+        self.connectAndIgnore()
+        if not self.authentificate():
+            self.close()
+            return False
+
+        open(os.path.join(TESTS_DIR, "nothing"), "w")
+
+        self.socket.send(f"DELE {TESTS_DIRNAME}/nothing\r\n".encode())
+
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.statusCode(data, 250)
+        self.close()
+        return b
+
+class DeleInvalidFileTest(SocketTest):
+    def test(self):
+        self.connectAndIgnore()
+        if not self.authentificate():
+            self.close()
+            return False
+
+        self.socket.send(f"DELE {TESTS_DIRNAME}/thisfileisnotvalidanditdoesntexist\r\n".encode())
+
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.statusCode(data, 550)
+        self.close()
+        return b
+
 class HalfCommandOne(SocketTest):
     def test(self):
         self.connectAndIgnore()
@@ -558,9 +588,10 @@ class TestWrapper:
         self.execute(ListActiveTest(), "ListActiveTest")
         self.execute(StorActiveTest(), "StorActiveTest")
         self.execute(StorPassiveTest(), "StorPassiveTest")
+        self.execute(DeleValidFileTest(), "DeleValidFileTest")
+        self.execute(DeleInvalidFileTest(), "DeleInvalidFileTest")
         self.execute(HalfCommandOne(), "HalfCommandOne")
         self.execute(HalfCommandTwo(), "HalfCommandTwo")
-        # TODO: Deleting files
         # TODO: Working directory
 
     def display(self):
