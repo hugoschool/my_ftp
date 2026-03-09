@@ -371,6 +371,37 @@ class ListActiveTest(DataSocketTest):
         self.close()
         return b
 
+class HalfCommandOne(SocketTest):
+    def test(self):
+        self.connectAndIgnore()
+
+        self.socket.send(b"USER Ano")
+
+        time.sleep(2)
+
+        self.socket.send(b"nymous\r\n")
+
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 331)
+        self.close()
+        return b
+
+class HalfCommandTwo(SocketTest):
+    def test(self):
+        self.connectAndIgnore()
+
+        self.socket.send(b"USER Anonymous\r\nP")
+        data = self.socket.recv(BUFFER_SIZE)
+        if not BufferVerify.ending(data) and BufferVerify.statusCode(data, 331):
+            self.close()
+            return False
+
+        self.socket.send(b"ASS\r\n")
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 230)
+        self.close()
+        return b
+
 class TestWrapper:
     def __init__(self):
         self.passed_tests = 0
@@ -426,6 +457,8 @@ class TestWrapper:
         self.execute(RetrActiveTest())
         self.execute(ListPassiveTest())
         self.execute(ListActiveTest())
+        self.execute(HalfCommandOne())
+        self.execute(HalfCommandTwo())
         # TODO: Uploading files
         # TODO: Deleting files
         # TODO: Working directory
