@@ -20,14 +20,32 @@ LIST_FILES = [
     b"anotherdirectory",
 ]
 
+class Colors:
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    PURPLE = '\033[35m'
+    RESET = '\033[0m'
+
 class BufferVerify:
     @staticmethod
     def statusCode(buffer, statusCode: int):
-        return buffer.startswith(str(statusCode).encode())
+        return_value = BufferVerify.ending(buffer) and buffer.startswith(str(statusCode).encode())
+
+        if return_value is False:
+            print("Buffer does not have the right status code")
+            print(f"    Given: {buffer}")
+            print(f"    Expected status code: {statusCode}")
+
+        return return_value
 
     @staticmethod
     def ending(buffer) -> bool:
-        return buffer.endswith(CRLF)
+        return_value = buffer.endswith(CRLF)
+
+        if return_value is False:
+            print("Buffer does not end with CRLF")
+
+        return return_value
 
 class Utils:
     @staticmethod
@@ -64,14 +82,14 @@ class SocketTest:
         self.socket.send(b"USER Anonymous\r\n")
         data = self.socket.recv(BUFFER_SIZE)
 
-        if not BufferVerify.ending(data) and not BufferVerify.statusCode(data, 331):
+        if not BufferVerify.statusCode(data, 331):
             b = False
             return b
 
         self.socket.send(b"PASS\r\n")
         data = self.socket.recv(BUFFER_SIZE)
 
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 230)
+        b = BufferVerify.statusCode(data, 230)
         return b
 
     def test(self):
@@ -82,7 +100,7 @@ class SimpleConnectionTest(SocketTest):
         self.connect()
         data = self.socket.recv(BUFFER_SIZE)
 
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 220)
+        b = BufferVerify.statusCode(data, 220)
         self.close()
         return b
 
@@ -101,7 +119,7 @@ class WrongAuthentificationTest(SocketTest):
         self.socket.send(b"USER THISOBVIOUSLYISFALSELOL\r\n")
         data = self.socket.recv(BUFFER_SIZE)
 
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 331)
+        b = BufferVerify.statusCode(data, 331)
         self.close()
         return b
 
@@ -125,7 +143,7 @@ class SendingBeforeAuthTest(SocketTest):
             self.socket.send(command)
             data = self.socket.recv(BUFFER_SIZE)
 
-            b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 530)
+            b = BufferVerify.statusCode(data, 530)
             if b == False:
                 self.close()
                 return False
@@ -140,7 +158,7 @@ class WrongCommandTest(SocketTest):
         self.socket.send(b"OBVIOUSLYTHISISAFAKECOMMAND\r\n")
         data = self.socket.recv(BUFFER_SIZE)
 
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 500)
+        b = BufferVerify.statusCode(data, 500)
         self.close()
         return b
 
@@ -151,7 +169,7 @@ class OnlySpacesTest(SocketTest):
         self.socket.send(b"                                                                  \r\n")
         data = self.socket.recv(BUFFER_SIZE)
 
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 500)
+        b = BufferVerify.statusCode(data, 500)
         self.close()
         return b
 
@@ -162,7 +180,7 @@ class NoOperationTest(SocketTest):
         self.socket.send(b"NOOP\r\n")
         data = self.socket.recv(BUFFER_SIZE)
 
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 200)
+        b = BufferVerify.statusCode(data, 200)
         self.close()
         return b
 
@@ -182,7 +200,7 @@ class HelpTest(SocketTest):
             self.close()
             return True
 
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 214)
+        b = BufferVerify.statusCode(data, 214)
         self.close()
         return b
 
@@ -219,14 +237,11 @@ class DataSocketTest(SocketTest):
         self.socket.send(b"PASV\r\n")
         data = self.socket.recv(BUFFER_SIZE)
 
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 227)
+        b = BufferVerify.statusCode(data, 227)
         if b == False:
             return None
 
         pasvPort = Utils.getPasvPort(data.decode("utf-8"))
-        if pasvPort is None:
-            return None
-
         return pasvPort
 
     def activeConnection(self) -> bool:
@@ -243,7 +258,7 @@ class DataSocketTest(SocketTest):
         self.socket.send(b"PORT 0,0,0,0,150,192\r\n")
         data = self.socket.recv(BUFFER_SIZE)
 
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 200)
+        b = BufferVerify.statusCode(data, 200)
         if b == False:
             self.close()
             return False
@@ -264,7 +279,7 @@ class RetrPassiveTest(DataSocketTest):
 
         self.socket.send(b"RETR tests/wtftp-tests/justafile\r\n")
         data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 150)
+        b = BufferVerify.statusCode(data, 150)
         if b == False:
             self.close()
             return False
@@ -276,7 +291,7 @@ class RetrPassiveTest(DataSocketTest):
             return
 
         data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 226)
+        b = BufferVerify.statusCode(data, 226)
         self.close()
         return b
 
@@ -288,7 +303,7 @@ class RetrActiveTest(DataSocketTest):
 
         self.socket.send(b"RETR tests/wtftp-tests/justafile\r\n")
         data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 150)
+        b = BufferVerify.statusCode(data, 150)
         if b == False:
             self.close()
             return False
@@ -299,7 +314,7 @@ class RetrActiveTest(DataSocketTest):
             return
 
         data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 226)
+        b = BufferVerify.statusCode(data, 226)
         self.close()
         return b
 
@@ -315,7 +330,7 @@ class ListPassiveTest(DataSocketTest):
 
         self.socket.send(b"LIST\r\n")
         data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 150)
+        b = BufferVerify.statusCode(data, 150)
         if b == False:
             self.close()
             return False
@@ -334,7 +349,7 @@ class ListPassiveTest(DataSocketTest):
                 return False
 
         data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 226)
+        b = BufferVerify.statusCode(data, 226)
         self.close()
         return b
 
@@ -349,7 +364,7 @@ class ListActiveTest(DataSocketTest):
 
         self.socket.send(b"LIST\r\n")
         data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 150)
+        b = BufferVerify.statusCode(data, 150)
         if b == False:
             self.close()
             return False
@@ -367,7 +382,7 @@ class ListActiveTest(DataSocketTest):
                 return False
 
         data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 226)
+        b = BufferVerify.statusCode(data, 226)
         self.close()
         return b
 
@@ -382,7 +397,7 @@ class HalfCommandOne(SocketTest):
         self.socket.send(b"nymous\r\n")
 
         data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 331)
+        b = BufferVerify.statusCode(data, 331)
         self.close()
         return b
 
@@ -392,13 +407,13 @@ class HalfCommandTwo(SocketTest):
 
         self.socket.send(b"USER Anonymous\r\nP")
         data = self.socket.recv(BUFFER_SIZE)
-        if not BufferVerify.ending(data) and BufferVerify.statusCode(data, 331):
+        if not  BufferVerify.statusCode(data, 331):
             self.close()
             return False
 
         self.socket.send(b"ASS\r\n")
         data = self.socket.recv(BUFFER_SIZE)
-        b = BufferVerify.ending(data) and BufferVerify.statusCode(data, 230)
+        b = BufferVerify.statusCode(data, 230)
         self.close()
         return b
 
@@ -414,10 +429,12 @@ class TestWrapper:
             print(f"Failed with error {e}")
             return False
 
-    def execute(self, test: SocketTest):
+    def execute(self, test: SocketTest, name: str = None):
         if self._executeTest(test):
             self.passed_tests += 1
         else:
+            print(f"{Colors.RED}{name} failed{Colors.RESET}")
+            print()
             self.failed_tests += 1
 
     def prepare(self):
@@ -445,30 +462,32 @@ class TestWrapper:
             os.remove(writtenFile)
 
     def test(self):
-        self.execute(SimpleConnectionTest())
-        self.execute(HelpTest())
-        self.execute(MultipleConnectionTest())
-        self.execute(AuthentificationTest())
-        self.execute(WrongAuthentificationTest())
-        self.execute(SendingBeforeAuthTest())
-        self.execute(WrongCommandTest())
-        self.execute(NoOperationTest())
-        self.execute(RetrPassiveTest())
-        self.execute(RetrActiveTest())
-        self.execute(ListPassiveTest())
-        self.execute(ListActiveTest())
-        self.execute(HalfCommandOne())
-        self.execute(HalfCommandTwo())
+        self.execute(SimpleConnectionTest(), "SimpleConnectionTest")
+        self.execute(HelpTest(), "HelpTest")
+        self.execute(MultipleConnectionTest(), "MultipleConnectionTest")
+        self.execute(AuthentificationTest(), "AuthentificationTest")
+        self.execute(WrongAuthentificationTest(), "WrongAuthentificationTest")
+        self.execute(SendingBeforeAuthTest(), "SendingBeforeAuthTest")
+        self.execute(WrongCommandTest(), "WrongCommandTest")
+        self.execute(NoOperationTest(), "NoOperationTest")
+        self.execute(RetrPassiveTest(), "RetrPassiveTest")
+        self.execute(RetrActiveTest(), "RetrActiveTest")
+        self.execute(ListPassiveTest(), "ListPassiveTest")
+        self.execute(ListActiveTest(), "ListActiveTest")
+        self.execute(HalfCommandOne(), "HalfCommandOne")
+        self.execute(HalfCommandTwo(), "HalfCommandTwo")
         # TODO: Uploading files
         # TODO: Deleting files
         # TODO: Working directory
 
     def display(self):
-        print(f"Passed: {self.passed_tests}, Failed: {self.failed_tests}")
+        print(f"Passed: {Colors.GREEN}{self.passed_tests}{Colors.RESET}, Failed: {Colors.RED}{self.failed_tests}{Colors.RESET}")
 
 def main():
+    print(Colors.PURPLE, end="")
     print("WTFTP: What The File (Transfer Protocol) Testing Program")
     print("--------------------------------------------------------")
+    print(Colors.RESET, end="")
     print()
 
     print("For now, please launch `./myftp 4242 .` from the original my_ftp folder")
