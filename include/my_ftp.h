@@ -52,12 +52,21 @@ typedef enum {
 } data_mode_t;
 
 typedef struct {
+    char *buffer;
+    size_t amount;
+    size_t size;
+    // Previous command pointer
+    char *previous;
+} buffer_t;
+
+typedef struct {
     // Pointer to its struct pollfd file descriptor
     int *fd;
     char *path;
     int data_fd;
     data_mode_t data_mode;
     login_step_t login_step;
+    buffer_t *buffer;
 } client_data_t;
 
 typedef struct {
@@ -67,14 +76,6 @@ typedef struct {
 } clients_t;
 
 typedef struct {
-    char *buffer;
-    size_t amount;
-    size_t size;
-    // Previous command pointer
-    char *previous;
-} buffer_t;
-
-typedef struct {
     poller_t *poller;
     // CONTROL socket aka the main server socket
     int control_fd;
@@ -82,8 +83,6 @@ typedef struct {
     clients_t *clients;
     // This "buffer" holds the current command being processed
     char *buffer;
-    // Handles the previous buffer commands
-    buffer_t *buffer_handler;
 } ftp_t;
 
 // Clients data

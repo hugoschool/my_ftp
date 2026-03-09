@@ -63,19 +63,18 @@ void client_handler(ftp_t *ftp, unsigned int *i)
     ssize_t bytes_read = 0;
     char buffer[BUFFER_SIZE + 1];
 
-    buffer_clear(ftp->buffer_handler);
     while (true) {
         memset(buffer, 0, BUFFER_SIZE + 1);
         bytes_read = read(fd, buffer, BUFFER_SIZE);
         if (bytes_read <= 0 && read_i == 0)
             return client_quit(ftp, i, false);
         buffer[bytes_read] = 0;
-        buffer_append(ftp->buffer_handler, buffer, bytes_read);
+        buffer_append(CLIENT->buffer, buffer, bytes_read);
         if (bytes_read < BUFFER_SIZE)
             break;
         read_i++;
     }
-    while (buffer_set_current_command(ftp->buffer_handler, ftp))
+    while (buffer_set_current_command(CLIENT->buffer, ftp))
         commands_handler(ftp, i);
 }
 

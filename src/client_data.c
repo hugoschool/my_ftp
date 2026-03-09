@@ -28,6 +28,7 @@ client_data_t *client_data_init(int *fd)
     data->data_fd = -1;
     data->login_step = LOGGED_OUT;
     data->data_mode = NO_MODE;
+    data->buffer = buffer_init();
     return data;
 }
 
@@ -39,6 +40,7 @@ void client_data_free(client_data_t *data)
         return;
     if (data->path)
         free(data->path);
+    buffer_free(data->buffer);
     client_data_close_data_socket(data);
     free(data);
     data = NULL;
