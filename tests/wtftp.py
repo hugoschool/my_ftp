@@ -263,12 +263,14 @@ class DataSocketTest(SocketTest):
             self.close()
             return False
 
-        dataPort = 38592
+        dataPort = random.randint(30000,40000)
         self.dataSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.dataSocket.bind((HOST, dataPort))
         self.dataSocket.listen(2)
 
-        self.socket.send(b"PORT 0,0,0,0,150,192\r\n")
+        p1 = int(dataPort / 256)
+        p2 = dataPort - (p1 * 256)
+        self.socket.send(f"PORT 0,0,0,0,{p1},{p2}\r\n".encode())
         data = self.socket.recv(BUFFER_SIZE)
 
         b = BufferVerify.statusCode(data, 200)
