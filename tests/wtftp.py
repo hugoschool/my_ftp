@@ -582,8 +582,7 @@ class myFTP:
             sys.exit(1)
 
         if self.pid == 0:
-            # Redirect all outputs to /dev/null
-            fd = os.open("/dev/null", os.O_WRONLY)
+            fd = os.open(f"/tmp/{os.path.basename(self.file)}", os.O_RDWR | os.O_CREAT)
             os.dup2(fd, 1)
             os.dup2(fd, 2)
             os.execv(self.file, [self.file, str(PORT), BASE_DIR])
