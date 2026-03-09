@@ -20,6 +20,7 @@ CRLF = b"\r\n"
 BUFFER_SIZE = 1024
 
 JUSTAFILE_CONTENT = "Hello this is just a test for WTFTP!"
+IWROTETHISFILE_PATH = os.path.join(TESTS_DIR, "iwrotethisfile")
 IWROTETHISFILE_CONTENT = "Yeah I just wrote this and it's pretty\ngood lol!"
 LIST_FILES = [
     b"file1",
@@ -398,6 +399,71 @@ class ListActiveTest(DataSocketTest):
         self.close()
         return b
 
+class StorTests(DataSocketTest):
+    def close(self):
+        super().close()
+
+    def _testWrapper(self):
+        pass
+
+    def test(self):
+        if self._testWrapper() == False:
+            return False
+
+        try:
+            with open(IWROTETHISFILE_PATH, "r") as f:
+                content = f.read()
+                os.remove(IWROTETHISFILE_PATH)
+                return content == IWROTETHISFILE_CONTENT
+            return False
+        except:
+            return False
+
+class StorActiveTest(StorTests):
+    def _testWrapper(self):
+        if not self.activeConnection():
+            self.close()
+            return False
+
+        self.socket.send(f"STOR {TESTS_DIRNAME}/iwrotethisfile\r\n".encode())
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.statusCode(data, 150)
+        if b == False:
+            self.close()
+            return False
+
+        acceptedSocket = self.activeAccept()
+        dataSocketData = acceptedSocket.send(IWROTETHISFILE_CONTENT.encode())
+        acceptedSocket.close()
+
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.statusCode(data, 226)
+        self.close()
+        return b
+
+class StorPassiveTest(StorTests):
+    def _testWrapper(self):
+        dataPort = self.passiveConnection()
+        if not dataPort:
+            self.close()
+            return False
+
+        self.socket.send(f"STOR {TESTS_DIRNAME}/iwrotethisfile\r\n".encode())
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.statusCode(data, 150)
+        if b == False:
+            self.close()
+            return False
+
+        self.dataSocket.connect((HOST, dataPort))
+        dataSocketData = self.dataSocket.send(IWROTETHISFILE_CONTENT.encode())
+        self.dataSocket.close()
+
+        data = self.socket.recv(BUFFER_SIZE)
+        b = BufferVerify.statusCode(data, 226)
+        self.close()
+        return b
+
 class HalfCommandOne(SocketTest):
     def test(self):
         self.connectAndIgnore()
@@ -490,9 +556,10 @@ class TestWrapper:
         self.execute(RetrActiveTest(), "RetrActiveTest")
         self.execute(ListPassiveTest(), "ListPassiveTest")
         self.execute(ListActiveTest(), "ListActiveTest")
+        self.execute(StorActiveTest(), "StorActiveTest")
+        self.execute(StorPassiveTest(), "StorPassiveTest")
         self.execute(HalfCommandOne(), "HalfCommandOne")
         self.execute(HalfCommandTwo(), "HalfCommandTwo")
-        # TODO: Uploading files
         # TODO: Deleting files
         # TODO: Working directory
 
