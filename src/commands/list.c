@@ -7,6 +7,7 @@
 
 #include "my_ftp.h"
 #include "status.h"
+#include "utils.h"
 #include <dirent.h>
 #include <linux/limits.h>
 #include <stdbool.h>
@@ -14,6 +15,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <unistd.h>
+
+static void combine_full_path(char full_path[PATH_MAX],
+    const char *initial_path, const char *path)
+{
+    strncpy(full_path, initial_path, PATH_MAX);
+    strcat(full_path, path);
+}
 
 static bool list_all_files(int fd, const char *initial_path, char *path)
 {
@@ -21,17 +30,21 @@ static bool list_all_files(int fd, const char *initial_path, char *path)
     struct dirent *entry = NULL;
     DIR *dir = NULL;
 
-    strncpy(full_path, initial_path, PATH_MAX);
-    strcat(full_path, path);
-    dir = opendir(full_path);
-    if (dir == NULL)
+    if (path == NULL)
         return false;
+    combine_full_path(full_path, initial_path, path);
+    dir = opendir(full_path);
+    if (dir == NULL) {
+        free(path);
+        return false;
+    }
     entry = readdir(dir);
     while (entry != NULL) {
         dprintf(fd, "%s\n", entry->d_name);
         entry = readdir(dir);
     }
     closedir(dir);
+    free(path);
     return true;
 }
 
@@ -42,6 +55,25 @@ static void close_and_error(ftp_t *ftp, unsigned int *i, int fd)
     exit(1);
 }
 
+static char *get_argument(ftp_t *ftp, unsigned int *i)
+{
+    char *pathname = strchr(ftp->buffer, ' ');
+    size_t len = 0;
+    char *str = NULL;
+
+    if (pathname) {
+        pathname = pathname + 1;
+        remove_crlf(pathname + 1);
+        len = strlen(CLIENT->path) + strlen(pathname) + 1;
+        str = calloc(len, sizeof(char));
+        strcpy(str, CLIENT->path);
+        strcat(str, pathname);
+        return str;
+    } else {
+        return strdup(CLIENT->path);
+    }
+}
+
 static void child_process(ftp_t *ftp, unsigned int *i)
 {
     int fd = get_data_socket(ftp, i);
@@ -50,7 +82,7 @@ static void child_process(ftp_t *ftp, unsigned int *i)
         perror("accept");
         close_and_error(ftp, i, fd);
     }
-    if (!list_all_files(fd, ftp->initial_path, CLIENT->path))
+    if (!list_all_files(fd, ftp->initial_path, get_argument(ftp, i)))
         close_and_error(ftp, i, fd);
     WRITE_STATUS(*CLIENT->fd, 226);
     close_data_socket(ftp, i, fd);
@@ -69,7 +101,6 @@ static void fork_process(ftp_t *ftp, unsigned int *i)
     }
 }
 
-// TODO: [pathname]
 void command_list(ftp_t *ftp, unsigned int *i)
 {
     if (CLIENT->login_step != LOGGED_IN) {
