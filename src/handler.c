@@ -74,7 +74,8 @@ void client_handler(ftp_t *ftp, unsigned int *i)
             break;
         read_i++;
     }
-    while (buffer_set_current_command(CLIENT->buffer, ftp))
+    while (*i < ftp->clients->amount
+        && buffer_set_current_command(CLIENT->buffer, ftp))
         commands_handler(ftp, i);
 }
 

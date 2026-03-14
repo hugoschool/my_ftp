@@ -41,6 +41,7 @@ void client_data_free(client_data_t *data)
     if (data->path)
         free(data->path);
     buffer_free(data->buffer);
+    data->buffer = NULL;
     client_data_close_data_socket(data);
     free(data);
     data = NULL;

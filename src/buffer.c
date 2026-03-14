@@ -79,6 +79,8 @@ bool buffer_set_current_command(buffer_t *buffer, ftp_t *ftp)
     char *ptr = NULL;
     size_t size = 0;
 
+    if (buffer == NULL)
+        return false;
     if (buffer->previous == NULL)
         buffer->previous = buffer->buffer;
     ptr = strstr(buffer->previous, CRLF);
