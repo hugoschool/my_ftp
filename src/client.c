@@ -52,3 +52,12 @@ void clients_delete(clients_t *clients, int i)
     clients->clients[i] = clients->clients[clients->amount - 1];
     clients->amount--;
 }
+
+void clients_free(clients_t *clients)
+{
+    for (size_t i = 0; i < clients->amount; i++) {
+        client_data_free(clients->clients[i]);
+    }
+    free(clients->clients);
+    free(clients);
+}

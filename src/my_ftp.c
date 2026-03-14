@@ -34,6 +34,8 @@ void ftp_free(ftp_t *ftp)
         free(ftp->buffer);
     if (ftp->control_fd != -1)
         close(ftp->control_fd);
+    if (ftp->clients)
+        clients_free(ftp->clients);
     free((void *)ftp->initial_path);
     free(ftp);
 }

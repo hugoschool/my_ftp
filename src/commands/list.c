@@ -52,6 +52,7 @@ static void close_and_error(ftp_t *ftp, unsigned int *i, int fd)
 {
     close_data_socket(ftp, i, fd);
     WRITE_STATUS(*CLIENT->fd, 426);
+    ftp_free(ftp);
     exit(1);
 }
 
@@ -86,6 +87,7 @@ static void child_process(ftp_t *ftp, unsigned int *i)
         close_and_error(ftp, i, fd);
     WRITE_STATUS(*CLIENT->fd, 226);
     close_data_socket(ftp, i, fd);
+    ftp_free(ftp);
     exit(0);
 }
 
@@ -96,6 +98,7 @@ static void fork_process(ftp_t *ftp, unsigned int *i)
 
     if (pid == 0) {
         child_process(ftp, i);
+        ftp_free(ftp);
     } else {
         close_data_socket(ftp, i, -1);
     }

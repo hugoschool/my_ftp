@@ -96,6 +96,7 @@ void client_data_close_data_socket(client_data_t *data);
 clients_t *clients_init(void);
 void clients_adder(clients_t *clients, int *fd);
 void clients_delete(clients_t *clients, int i);
+void clients_free(clients_t *clients);
 
 // Sockets
 int socket_init(in_port_t port);
